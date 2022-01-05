@@ -1003,7 +1003,7 @@ class DocumentTest extends TestCase
             ->willReturn($metadata);
 
         $containerGetMap = [
-            ['doctrine.odm.mongodb.document_manager', Container::EXCEPTION_ON_INVALID_REFERENCE, $documentManager],
+            ['doctrine_mongodb.odm.document_manager', Container::EXCEPTION_ON_INVALID_REFERENCE, $documentManager],
             ['grid.mapping.manager', Container::EXCEPTION_ON_INVALID_REFERENCE, $mapping]
         ];
 

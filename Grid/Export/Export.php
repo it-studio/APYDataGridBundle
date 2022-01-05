@@ -16,10 +16,12 @@ use APY\DataGridBundle\Grid\Column\ArrayColumn;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Template;
+use Twig\TemplateWrapper;
 
 abstract class Export implements ExportInterface, ContainerAwareInterface
 {
-    const DEFAULT_TEMPLATE = 'APYDataGridBundle::blocks.html.twig';
+    const DEFAULT_TEMPLATE = '@APYDataGrid/blocks.html.twig';
 
     protected $title;
 
@@ -459,7 +461,7 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
         $templates = [];
 
         $template = $this->twig->loadTemplate($theme);
-        while ($template instanceof TemplateWrapper) {
+        while ($template instanceof Template or $template instanceof TemplateWrapper) {
             $templates[] = $template;
             $template = $template->getParent([]);
         }

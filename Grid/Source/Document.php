@@ -84,7 +84,7 @@ class Document extends Source
 
     public function initialise($container)
     {
-        $this->manager = $container->get('doctrine.odm.mongodb.document_manager');
+        $this->manager = $container->get('doctrine_mongodb.odm.document_manager');
         $this->odmMetadata = $this->manager->getClassMetadata($this->documentName);
         $this->class = $this->odmMetadata->getReflectionClass()->getName();
 
@@ -231,6 +231,10 @@ class Document extends Source
             $validColumns[] = $column;
         }
 
+        $countQuery = clone $this->query;
+        $this->prepareQuery($countQuery);
+        $this->count = $countQuery->count()->getQuery()->execute();
+
         if ($page > 0) {
             $this->query->skip($page * $limit);
         }
@@ -254,8 +258,6 @@ class Document extends Source
         // I really don't know if Cursor is the right type returned (I mean, every single type).
         // As I didn't find out this information, I'm gonna test it with Cursor returned only.
         $cursor = $this->query->getQuery()->execute();
-
-        $this->count = $cursor->count();
 
         foreach ($cursor as $resource) {
             $row = new Row();
