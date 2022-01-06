@@ -1,9 +1,11 @@
 services:
     # Core
     apy_grid.factory:
+        public: true
         class: APY\DataGridBundle\Grid\GridFactory
         arguments: ['@service_container', '@apy_grid.registry']
     apy_grid.registry:
+        public: true
         class: APY\DataGridBundle\Grid\GridRegistry
 
     # Types
