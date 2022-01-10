@@ -1017,7 +1017,7 @@ class DocumentTest extends TestCase
             ->method('addDriver')
             ->with($this->document, -1);
 
-        $this->document->initialise($container);
+        $this->document->initialise();
     }
 
     private function stubBuilder(array $documents = [])

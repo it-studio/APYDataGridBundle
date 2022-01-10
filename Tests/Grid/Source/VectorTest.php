@@ -49,7 +49,7 @@ class VectorTest extends TestCase
 
     public function testInitialiseWithoutData()
     {
-        $this->vector->initialise($this->createMock(Container::class));
+        $this->vector->initialise();
 
         $this->assertAttributeEmpty('columns', $this->vector);
     }
@@ -92,7 +92,7 @@ class VectorTest extends TestCase
         ]);
         $uc2->setType('text');
 
-        $vector->initialise($this->createMock(Container::class));
+        $vector->initialise();
 
         $this->assertAttributeEquals([$column, $column2, $uc1, $uc2], 'columns', $vector);
     }
@@ -113,7 +113,7 @@ class VectorTest extends TestCase
 
         $vector = new Vector([[$columnId => 'c1', $column2Id => 'c2']], [$column, $column2]);
 
-        $vector->initialise($this->createMock(Container::class));
+        $vector->initialise();
 
         $this->assertAttributeEquals([$column, $column2], 'columns', $vector);
     }
@@ -126,7 +126,7 @@ class VectorTest extends TestCase
         $untypedColumn->setType($columnType);
 
         $vector = new Vector($vectorValue);
-        $vector->initialise($this->createMock(Container::class));
+        $vector->initialise();
 
         $this->assertAttributeEquals([$untypedColumn], 'columns', $vector);
     }

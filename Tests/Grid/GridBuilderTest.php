@@ -78,7 +78,7 @@ class GridBuilderTest extends TestCase
             }));
 
         $this->factory = $this->createMock(GridFactoryInterface::class);
-        $this->builder = new GridBuilder($this->container, $this->factory, 'name');
+        $this->builder = new GridBuilder($this->factory, 'name');
     }
 
     public function testAddUnexpectedType()

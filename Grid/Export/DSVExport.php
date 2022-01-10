@@ -25,12 +25,12 @@ class DSVExport extends Export
 
     protected $withBOM = true;
 
-    public function __construct($title, $fileName = 'export', $params = [], $charset = 'UTF-8')
+    public function setup($title, $fileName = 'export', $params = [], $charset = 'UTF-8', $role = null)
     {
         $this->delimiter = isset($params['delimiter']) ? $params['delimiter'] : $this->delimiter;
         $this->withBOM = isset($params['withBOM']) ? $params['withBOM'] : $this->withBOM;
 
-        parent::__construct($title, $fileName, $params, $charset);
+        parent::setup($title, $fileName, $params, $charset, $role);
     }
 
     public function computeData($grid)

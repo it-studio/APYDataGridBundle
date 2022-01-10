@@ -19,6 +19,7 @@ use APY\DataGridBundle\Grid\Helper\ColumnsIterator;
 use APY\DataGridBundle\Grid\Row;
 use APY\DataGridBundle\Grid\Rows;
 use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
+use Doctrine\Persistence\ObjectManager;
 use MongoDB\BSON\Regex;
 
 class Document extends Source
@@ -32,6 +33,11 @@ class Document extends Source
      * @var \Doctrine\ODM\MongoDB\DocumentManager
      */
     protected $manager;
+
+    /**
+     * @var \APY\DataGridBundle\Grid\Mapping\Metadata\Manager
+     */
+    protected $mapping;
 
     /**
      * e.g. Base\Cms\Document\Page.
@@ -76,21 +82,30 @@ class Document extends Source
     /**
      * @param string $documentName e.g. "Cms:Page"
      */
-    public function __construct($documentName, $group = 'default')
+    public function __construct(ObjectManager $manager, object $mapping)
     {
-        $this->documentName = $documentName;
-        $this->group = $group;
+        $this->manager = $manager;
+        $this->mapping = $mapping;
     }
 
-    public function initialise($container)
+    public function setup(array $parameters)
     {
-        $this->manager = $container->get('doctrine_mongodb.odm.document_manager');
+        $defaults = [
+            "document" => null,
+            "group" => "default",
+        ];
+
+        $this->documentName = isset($parameters["document"]) ? $parameters["document"] : $defaults["document"];
+        $this->group = isset($parameters["group"]) ? $parameters["group"] : $defaults["group"];
+    }
+
+    public function initialise()
+    {
         $this->odmMetadata = $this->manager->getClassMetadata($this->documentName);
         $this->class = $this->odmMetadata->getReflectionClass()->getName();
 
-        $mapping = $container->get('grid.mapping.manager');
-        $mapping->addDriver($this, -1);
-        $this->metadata = $mapping->getMetadata($this->class, $this->group);
+        $this->mapping->addDriver($this, -1);
+        $this->metadata = $this->mapping->getMetadata($this->class, $this->group);
     }
 
     /**

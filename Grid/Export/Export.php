@@ -13,13 +13,13 @@
 namespace APY\DataGridBundle\Grid\Export;
 
 use APY\DataGridBundle\Grid\Column\ArrayColumn;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Template;
 use Twig\TemplateWrapper;
 
-abstract class Export implements ExportInterface, ContainerAwareInterface
+abstract class Export implements ExportInterface
 {
     const DEFAULT_TEMPLATE = '@APYDataGrid/blocks.html.twig';
 
@@ -33,11 +33,7 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
 
     protected $parameters = [];
 
-    protected $container;
-
     protected $templates;
-
-    protected $twig;
 
     protected $grid;
 
@@ -49,50 +45,33 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
 
     protected $role;
 
+    protected $twig;
+    protected $router;
+    protected $translator;
+    protected $kernelCharset;
+
+    public function __construct(object $twig, RouterInterface $router, TranslatorInterface $translator, $kernelCharset)
+    {
+        $this->twig = $twig;
+        $this->router = $router;
+        $this->translator = $translator;
+        $this->kernelCharset = $kernelCharset;
+    }
+
     /**
-     * Default Export constructor.
-     *
      * @param string $title    Title of the export
      * @param string $fileName FileName of the export
      * @param array  $params   Additionnal parameters for the export
      * @param string $charset  Charset of the exported data
      * @param string $role     Security role
-     *
-     * @return \APY\DataGridBundle\Grid\Export\Export
      */
-    public function __construct($title, $fileName = 'export', $params = [], $charset = 'UTF-8', $role = null)
+    public function setup($title, $fileName = 'export', $params = [], $charset = 'UTF-8', $role = null)
     {
         $this->title = $title;
         $this->fileName = $fileName;
         $this->params = $params;
         $this->charset = $charset;
         $this->role = $role;
-    }
-
-    /**
-     * Sets the Container associated with this Controller.
-     *
-     * @param ContainerInterface $container A ContainerInterface instance
-     *
-     * @return \APY\DataGridBundle\Grid\Export\Export
-     */
-    public function setContainer(ContainerInterface $container = null)
-    {
-        $this->container = $container;
-
-        $this->twig = $this->container->get('twig');
-
-        return $this;
-    }
-
-    /**
-     * gets the Container associated with this Controller.
-     *
-     * @return ContainerInterface
-     */
-    public function getContainer()
-    {
-        return $this->container;
     }
 
     /**
@@ -103,7 +82,7 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
     public function getResponse()
     {
         // Response
-        $kernelCharset = $this->container->getParameter('kernel.charset');
+        $kernelCharset = $this->kernelCharset;
         if ($this->charset != $kernelCharset && function_exists('mb_strlen')) {
             $this->content = mb_convert_encoding($this->content, $this->charset, $kernelCharset);
             $filesize = mb_strlen($this->content, '8bit');
@@ -285,12 +264,10 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
 
     protected function getRawGridTitles()
     {
-        $translator = $this->container->get('translator');
-
         $titles = [];
         foreach ($this->grid->getColumns() as $column) {
             if ($column->isVisible(true)) {
-                $titles[] = utf8_decode($translator->trans(/* @Ignore */$column->getTitle()));
+                $titles[] = utf8_decode($this->translator->trans(/* @Ignore */$column->getTitle()));
             }
         }
 
@@ -340,7 +317,7 @@ abstract class Export implements ExportInterface, ContainerAwareInterface
         $block = null;
         $return = [];
         foreach ($values as $sourceValue) {
-            $value = $column->renderCell($sourceValue, $row, $this->container->get('router'));
+            $value = $column->renderCell($sourceValue, $row, $this->router);
 
             $id = $this->grid->getId();
 

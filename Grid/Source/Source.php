@@ -98,13 +98,20 @@ abstract class Source implements DriverInterface
     abstract public function getTotalCount($maxResults = null);
 
     /**
-     * Set container.
-     *
      * @abstract
      *
-     * @param  $container
+     * @param array $parameters
+     *
+     * setting up
      */
-    abstract public function initialise($container);
+    abstract public function setup(array $parameters);
+
+    /**
+     * @abstract
+     *
+     * initialization
+     */
+    abstract public function initialise();
 
     /**
      * @abstract

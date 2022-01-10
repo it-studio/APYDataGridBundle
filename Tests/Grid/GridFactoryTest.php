@@ -188,6 +188,6 @@ class GridFactoryTest extends TestCase
 
         $this->registry = $this->createMock(GridRegistryInterface::class);
         $this->builder = $this->createMock(GridBuilderInterface::class);
-        $this->factory = new GridFactory($this->container, $this->registry);
+        $this->factory = new GridFactory($this->registry);
     }
 }

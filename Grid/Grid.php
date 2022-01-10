@@ -21,11 +21,12 @@ use APY\DataGridBundle\Grid\Column\MassActionColumn;
 use APY\DataGridBundle\Grid\Export\ExportInterface;
 use APY\DataGridBundle\Grid\Source\Entity;
 use APY\DataGridBundle\Grid\Source\Source;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\TemplateWrapper;
 
 class Grid implements GridInterface
@@ -62,11 +63,6 @@ class Grid implements GridInterface
     const TWEAK_NOT_DEFINED_EX_MSG = 'Tweak %s is not defined.';
 
     /**
-     * @var \Symfony\Component\DependencyInjection\Container
-     */
-    protected $container;
-
-    /**
      * @var \Symfony\Component\Routing\Router
      */
     protected $router;
@@ -77,6 +73,11 @@ class Grid implements GridInterface
     protected $session;
 
     /**
+     * @var \Symfony\Component\HttpFoundation\RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @var \Symfony\Component\HttpFoundation\Request
      */
     protected $request;
@@ -85,6 +86,16 @@ class Grid implements GridInterface
      * @var \Symfony\Component\Security\Core\Authorization\AuthorizationChecker
      */
     protected $securityContext;
+
+    /**
+     * @var \Symfony\Component\HttpKernel\HttpKernelInterface
+     */
+    protected $httpKernel;
+
+    /**
+     * @var \Twig\Environment
+     */
+    protected $twig;
 
     /**
      * @var string
@@ -319,20 +330,32 @@ class Grid implements GridInterface
     /**
      * Constructor.
      *
-     * @param Container                $container
+     * @param object                   $requestStack
+     * @param RouterInterface          $router
+     * @param AuthorizationCheckerInterface $authorizationChecker
+     * @param HttpKernelInterface      $httpKernel
+     * @param object                   $twig
      * @param string                   $id        set if you are using more then one grid inside controller
      * @param GridConfigInterface|null $config    The grid configuration.
      */
-    public function __construct($container, $id = '', GridConfigInterface $config = null)
+    public function __construct(
+        object $requestStack,
+        RouterInterface $router,
+        AuthorizationCheckerInterface $authorizationChecker,
+        HttpKernelInterface $httpKernel,
+        object $twig,
+        $id = '',
+        GridConfigInterface $config = null)
     {
-        // @todo: why the whole container is injected?
-        $this->container = $container;
         $this->config = $config;
 
-        $this->router = $container->get('router');
-        $this->request = $container->get('request_stack')->getCurrentRequest();
+        $this->requestStack = $requestStack;
+        $this->request = $this->getCurrentRequest();
+        $this->router = $router;
         $this->session = $this->request->getSession();
-        $this->securityContext = $container->get('security.authorization_checker');
+        $this->securityContext = $authorizationChecker;
+        $this->httpKernel = $httpKernel;
+        $this->twig = $twig;
 
         $this->id = $id;
 
@@ -344,6 +367,11 @@ class Grid implements GridInterface
                 unset($this->routeParameters[$key]);
             }
         }
+    }
+
+    public function getCurrentRequest()
+    {
+        return $this->requestStack->getCurrentRequest();
     }
 
     /**
@@ -399,7 +427,7 @@ class Grid implements GridInterface
         if (null !== $source) {
             $this->source = $source;
 
-            $source->initialise($this->container);
+            $source->initialise();
 
             if ($source instanceof Entity) {
                 $groupBy = $config->getGroupBy();
@@ -486,7 +514,7 @@ class Grid implements GridInterface
 
         $this->source = $source;
 
-        $this->source->initialise($this->container);
+        $this->source->initialise();
 
         // Get columns from the source
         $this->source->getColumns($this->columns);
@@ -664,7 +692,7 @@ class Grid implements GridInterface
 
                     $subRequest = $this->request->duplicate([], null, $path);
 
-                    $this->massActionResponse = $this->container->get('http_kernel')->handle($subRequest, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+                    $this->massActionResponse = $this->httpKernel->handle($subRequest, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
                 } else {
                     throw new \RuntimeException(sprintf(self::MASS_ACTION_CALLBACK_NOT_VALID_EX_MSG, $action->getCallback()));
                 }
@@ -695,9 +723,6 @@ class Grid implements GridInterface
                 $this->prepare();
 
                 $export = $this->exports[$exportId];
-                if ($export instanceof ContainerAwareInterface) {
-                    $export->setContainer($this->container);
-                }
                 $export->computeData($this);
 
                 $this->exportResponse = $export->getResponse();
@@ -2149,7 +2174,7 @@ class Grid implements GridInterface
             if ($view === null) {
                 return $parameters;
             } else {
-                return new Response($this->container->get('twig')->render($view, $parameters, $response));
+                return new Response($this->twig->render($view, $parameters, $response));
             }
         }
     }

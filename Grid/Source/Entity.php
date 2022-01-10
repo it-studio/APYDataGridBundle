@@ -32,6 +32,16 @@ class Entity extends Source
     const COLON_DQL_ALIAS_PH = '__col__';
 
     /**
+     * @var \Doctrine\Bundle\DoctrineBundle\Registry
+     */
+    protected $doctrine;
+
+    /**
+     * @var \APY\DataGridBundle\Grid\Mapping\Metadata\Manager
+     */
+    protected $mapping;
+
+    /**
      * @var \Doctrine\ORM\EntityManager
      */
     protected $manager;
@@ -126,30 +136,39 @@ class Entity extends Source
      * @param string $entityName  e.g Cms:Page
      * @param string $managerName e.g. mydatabase
      */
-    public function __construct($entityName, $group = 'default', $managerName = null)
+    public function __construct(object $doctrine, object $mapping)
     {
-        $this->entityName = $entityName;
-        $this->managerName = $managerName;
+        $this->doctrine = $doctrine;
+        $this->mapping = $mapping;
+
         $this->joins = [];
-        $this->group = $group;
         $this->hints = [];
         $this->setTableAlias(self::TABLE_ALIAS);
     }
 
-    public function initialise($container)
+    public function setup(array $parameters)
     {
-        $doctrine = $container->get('doctrine');
+        $defaults = [
+            "entity" => null,
+            "group" => "default",
+            "managerName" => null,
+        ];
 
-        $this->manager = version_compare(Kernel::VERSION, '2.1.0', '>=') ? $doctrine->getManager($this->managerName) : $doctrine->getEntityManager($this->managerName);
+        $this->entityName = isset($parameters["entity"]) ? $parameters["entity"] : $defaults["entity"];
+        $this->group = isset($parameters["group"]) ? $parameters["group"] : $defaults["group"];
+        $this->managerName = isset($parameters["managerName"]) ? $parameters["managerName"] : $defaults["managerName"];
+    }
+
+    public function initialise()
+    {
+        $this->manager = version_compare(Kernel::VERSION, '2.1.0', '>=') ? $this->doctrine->getManager($this->managerName) : $this->doctrine->getEntityManager($this->managerName);
         $this->ormMetadata = $this->manager->getClassMetadata($this->entityName);
 
         $this->class = $this->ormMetadata->getReflectionClass()->name;
 
-        $mapping = $container->get('grid.mapping.manager');
-
         /* todo autoregister mapping drivers with tag */
-        $mapping->addDriver($this, -1);
-        $this->metadata = $mapping->getMetadata($this->class, $this->group);
+        $this->mapping->addDriver($this, -1);
+        $this->metadata = $this->mapping->getMetadata($this->class, $this->group);
 
         $this->groupBy = $this->metadata->getGroupBy();
     }

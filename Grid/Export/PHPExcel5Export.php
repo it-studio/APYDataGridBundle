@@ -24,11 +24,11 @@ class PHPExcel5Export extends Export
 
     public $objPHPExcel;
 
-    public function __construct($tilte, $fileName = 'export', $params = [], $charset = 'UTF-8')
+    public function setup($title, $fileName = 'export', $params = [], $charset = 'UTF-8', $role = null)
     {
         $this->objPHPExcel = new \PHPExcel();
 
-        parent::__construct($tilte, $fileName, $params, $charset);
+        parent::setup($title, $fileName, $params, $charset, $role);
     }
 
     public function computeData($grid)

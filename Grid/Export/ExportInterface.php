@@ -41,4 +41,9 @@ interface ExportInterface
      * @return mixed
      */
     public function getRole();
+
+    /**
+     * set up settings
+     */
+    public function setup($title, $fileName = 'export', $params = [], $charset = 'UTF-8', $role = null);
 }

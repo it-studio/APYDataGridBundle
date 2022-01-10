@@ -14,10 +14,13 @@ namespace APY\DataGridBundle\Grid;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 class GridManager implements \IteratorAggregate, \Countable
 {
-    protected $container;
+    protected $grid;
+
+    protected $twig;
 
     protected $grids;
 
@@ -31,9 +34,11 @@ class GridManager implements \IteratorAggregate, \Countable
 
     const SAME_GRID_HASH_EX_MSG = 'Some grids seem similar. Please set an Indentifier for your grids.';
 
-    public function __construct($container)
+    public function __construct(GridInterface $grid, Environment $twig)
     {
-        $this->container = $container;
+        $this->grid = $grid;
+        $this->twig = $twig;
+
         $this->grids = new \SplObjectStorage();
     }
 
@@ -54,7 +59,7 @@ class GridManager implements \IteratorAggregate, \Countable
      */
     public function createGrid($id = null)
     {
-        $grid = $this->container->get('grid');
+        $grid = $this->grid;
 
         if ($id !== null) {
             $grid->setId($id);
@@ -193,7 +198,13 @@ class GridManager implements \IteratorAggregate, \Countable
                 return $parameters;
             }
 
-            return $this->container->get('templating')->renderResponse($view, $parameters, $response);
+            if (null === $response) {
+                $response = new Response();
+            }
+
+            $response->setContent($this->twig->render($view, $parameters));
+
+            return $response;
         }
     }
 

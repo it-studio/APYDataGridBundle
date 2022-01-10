@@ -3,7 +3,13 @@ services:
     apy_grid.factory:
         public: true
         class: APY\DataGridBundle\Grid\GridFactory
-        arguments: ['@service_container', '@apy_grid.registry']
+        arguments:
+            - '@apy_grid.registry'
+            - '@request_stack'
+            - '@router'
+            - '@security.authorization_checker'
+            - '@http_kernel'
+            - '@twig'
     apy_grid.registry:
         public: true
         class: APY\DataGridBundle\Grid\GridRegistry
@@ -55,3 +61,120 @@ services:
         class: APY\DataGridBundle\Grid\Column\TimeColumn
         tags:
             - { name: apy_grid.column }
+
+    apy_grid.source_factory:
+        public: true
+        class: APY\DataGridBundle\Grid\SourceFactory
+
+    apy_grid.source.vector:
+        class: APY\DataGridBundle\Grid\Source\Vector
+        tags:
+            - { name: apy_grid.source, alias: vector }
+
+    apy_grid.source.entity:
+        class: APY\DataGridBundle\Grid\Source\Entity
+        arguments:
+            - '@doctrine'
+            - '@grid.mapping.manager'
+        tags:
+            - { name: apy_grid.source, alias: entity }
+
+    apy_grid.source.document:
+        class: APY\DataGridBundle\Grid\Source\Document
+        arguments:
+            - '@doctrine_mongodb.odm.document_manager'
+            - '@grid.mapping.manager'
+        tags:
+            - { name: apy_grid.source, alias: document }
+
+    apy_grid.export_factory:
+        public: true
+        class: APY\DataGridBundle\Grid\ExportFactory
+
+    apy_grid.export.csv:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\CSVExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: csv }
+
+    apy_grid.export.xml:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\XMLExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: xml }
+
+    apy_grid.export.json:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\JSONExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: json }
+
+    apy_grid.export.dsv:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\DSVExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: dsv }
+
+    apy_grid.export.tsv:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\TSVExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: tsv }
+
+    apy_grid.export.scsv:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\SCSVExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: scsv }
+
+    apy_grid.export.excel:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\ExcelExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: excel }
+
+    apy_grid.export.excel_2007:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\PHPExcel2007Export
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: excel_2007 }
