@@ -14,14 +14,4 @@ interface SourceFactoryInterface
      * @return Source
      */
     public function create(string $type, array $parameters = []): Source;
-
-    /**
-     * registers source type
-     *
-     * @param string $name
-     * @param Source $type
-     *
-     * @return $this
-     */
-    public function addType(string $name, Source $type);
 }

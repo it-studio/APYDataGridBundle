@@ -65,6 +65,8 @@ services:
     apy_grid.source_factory:
         public: true
         class: APY\DataGridBundle\Grid\SourceFactory
+        arguments:
+            - '@apy_grid.registry'
 
     apy_grid.source.vector:
         class: APY\DataGridBundle\Grid\Source\Vector
@@ -90,6 +92,8 @@ services:
     apy_grid.export_factory:
         public: true
         class: APY\DataGridBundle\Grid\ExportFactory
+        arguments:
+            - '@apy_grid.registry'
 
     apy_grid.export.csv:
         public: true

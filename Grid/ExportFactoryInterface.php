@@ -14,14 +14,4 @@ interface ExportFactoryInterface
      * @return ExportInterface
      */
     public function create(string $type, array $parameters = []): ExportInterface;
-
-    /**
-     * registers source type
-     *
-     * @param string $name
-     * @param ExportInterface $type
-     *
-     * @return $this
-     */
-    public function addType(string $name, ExportInterface $type);
 }

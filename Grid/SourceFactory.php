@@ -5,29 +5,22 @@ use APY\DataGridBundle\Grid\Source\Source;
 
 class SourceFactory implements SourceFactoryInterface
 {
-    /**
-     * registered source types
-     *
-     * @var array
-     */
-    protected $types;
+    protected $registry;
+
+    public function __construct(GridRegistryInterface $registry)
+    {
+        $this->registry = $registry;
+    }
 
     public function create(string $type, array $parameters = []): Source
     {
-        if (!isset($this->types[$type])) {
+        if (!$this->registry->hasSource($type)) {
             throw new \Exception(sprintf("Can't find grid source type '%s'.", $type));
         }
 
-        $source = clone $this->types[$type];
+        $source = clone $this->registry->getSource($type);
         $source->setup($parameters);
 
         return $source;
-    }
-
-    public function addType(string $name, Source $type)
-    {
-        $this->types[$name] = $type;
-
-        return $this;
     }
 }

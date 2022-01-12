@@ -7,6 +7,8 @@ use APY\DataGridBundle\Grid\Exception\ColumnAlreadyExistsException;
 use APY\DataGridBundle\Grid\Exception\ColumnNotFoundException;
 use APY\DataGridBundle\Grid\Exception\TypeAlreadyExistsException;
 use APY\DataGridBundle\Grid\Exception\TypeNotFoundException;
+use APY\DataGridBundle\Grid\Source\Source;
+use APY\DataGridBundle\Grid\Export\Export;
 
 /**
  * The central registry of the Grid component.
@@ -28,6 +30,20 @@ class GridRegistry implements GridRegistryInterface
      * @var Column[]
      */
     private $columns = [];
+
+    /**
+     * List of sources.
+     *
+     * @var Source[]
+     */
+    private $sources = [];
+
+    /**
+     * List of exports.
+     *
+     * @var Export[]
+     */
+    private $exports = [];
 
     /**
      * Add a grid type.
@@ -115,6 +131,86 @@ class GridRegistry implements GridRegistryInterface
     public function hasColumn($type)
     {
         if (isset($this->columns[$type])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Add a source type.
+     *
+     * @param $type
+     * @param Source $source
+     * @return $this
+     */
+    public function addSource($type, Source $source)
+    {
+        $this->sources[$type] = $source;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getSource($type)
+    {
+        if (!$this->hasSource($type)) {
+            throw new \Exception(sprintf("Unknown source type '%s'.", $type));
+        }
+
+        $source = $this->sources[$type];
+
+        return $source;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasSource($type)
+    {
+        if (isset($this->sources[$type])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Add an export type.
+     *
+     * @param $type
+     * @param Export $export
+     * @return $this
+     */
+    public function addExport($type, Export $export)
+    {
+        $this->exports[$type] = $export;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getExport($type)
+    {
+        if (!$this->hasExport($type)) {
+            throw new \Exception(sprintf("Unknown export type '%s'.", $type));
+        }
+
+        $export = $this->exports[$type];
+
+        return $export;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function hasExport($type)
+    {
+        if (isset($this->exports[$type])) {
             return true;
         }
 

@@ -46,4 +46,40 @@ interface GridRegistryInterface
      * @return bool
      */
     public function hasColumn($type);
+
+    /**
+     * Returns a source by type.
+     *
+     * @param string $type
+     *
+     * @return Source
+     */
+    public function getSource($type);
+
+    /**
+     * Returns whether the given source type is supported.
+     *
+     * @param string $type
+     *
+     * @return bool
+     */
+    public function hasSource($type);
+
+    /**
+     * Returns an export by type.
+     *
+     * @param string $type
+     *
+     * @return Export
+     */
+    public function getExport($type);
+
+    /**
+     * Returns whether the given export type is supported.
+     *
+     * @param string $type
+     *
+     * @return bool
+     */
+    public function hasExport($type);
 }

@@ -5,16 +5,16 @@ use APY\DataGridBundle\Grid\Export\ExportInterface;
 
 class ExportFactory implements ExportFactoryInterface
 {
-    /**
-     * registered export types
-     *
-     * @var array
-     */
-    protected $types;
+    protected $registry;
+
+    public function __construct(GridRegistryInterface $registry)
+    {
+        $this->registry = $registry;
+    }
 
     public function create(string $type, array $parameters = []): ExportInterface
     {
-        if (!isset($this->types[$type])) {
+        if (!$this->registry->hasExport($type)) {
             throw new \Exception(sprintf("Can't find grid export type '%s'.", $type));
         }
 
@@ -26,7 +26,7 @@ class ExportFactory implements ExportFactoryInterface
             "role" => null,
         ];
 
-        $export = clone $this->types[$type];
+        $export = clone $this->registry->getExport($type);
         $export->setup(
             isset($parameters["title"]) ? $parameters["title"] : $defaults["title"],
             isset($parameters["filename"]) ? $parameters["filename"] : $defaults["filename"],
@@ -36,12 +36,5 @@ class ExportFactory implements ExportFactoryInterface
         );
 
         return $export;
-    }
-
-    public function addType(string $name, ExportInterface $type)
-    {
-        $this->types[$name] = $type;
-
-        return $this;
     }
 }
