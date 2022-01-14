@@ -12,15 +12,18 @@
 
 namespace APY\DataGridBundle\Grid\Export;
 
-/**
- * PHPExcel_Excel 2003 Export (.xlsx).
- */
-class PHPExcel2003Export extends PHPExcel2007Export
+use PhpOffice\PhpSpreadsheet\Writer\Html;
+
+class HTMLExport extends ExcelExport
 {
+    protected $fileExtension = 'html';
+
+    protected $mimeType = 'text/html';
+
     protected function getWriter()
     {
-        $writer = parent::getWriter();
-        $writer->setOffice2003Compatibility(true);
+        $writer = new Html($this->objPHPExcel);
+        $writer->setPreCalculateFormulas(false);
 
         return $writer;
     }

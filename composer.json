@@ -45,7 +45,7 @@
     "suggest": {
         "ext-intl": "Translate the grid",
         "ext-mbstring": "Convert your data with the right charset",
-        "PHPExcel": "Export the grid (Excel, HTML or PDF)",
+        "phpoffice/phpspreadsheet": "Export the grid (Excel or HTML)",
         "doctrine/orm": "If you want to use Entity as source, please require doctrine/orm",
         "doctrine/mongodb-odm": "If you want to use Document as source, please require doctrine/mongodb-odm"
     },

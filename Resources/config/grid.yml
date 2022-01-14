@@ -89,6 +89,7 @@ services:
         tags:
             - { name: apy_grid.source, alias: document }
 
+    # exports
     apy_grid.export_factory:
         public: true
         class: APY\DataGridBundle\Grid\ExportFactory
@@ -172,13 +173,13 @@ services:
         tags:
             - { name: apy_grid.export, alias: excel }
 
-    apy_grid.export.excel_2007:
+    apy_grid.export.html:
         public: true
-        class: APY\DataGridBundle\Grid\Export\PHPExcel2007Export
+        class: APY\DataGridBundle\Grid\Export\HTMLExport
         arguments:
             - '@twig'
             - '@router'
             - '@translator'
             - '%kernel.charset%'
         tags:
-            - { name: apy_grid.export, alias: excel_2007 }
+            - { name: apy_grid.export, alias: html }
