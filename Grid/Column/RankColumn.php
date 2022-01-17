@@ -20,15 +20,15 @@ class RankColumn extends BlankColumn
     {
         parent::__initialize($params);
 
-        $this->setId($this->getParam('id', 'rank'));
-        $this->setTitle($this->getParam('title', 'rank'));
-        $this->setSize($this->getParam('size', '30'));
-        $this->setAlign($this->getParam('align', 'center'));
+        $this->column->setId($this->column->getParam('id', 'rank'));
+        $this->column->setTitle($this->column->getParam('title', 'rank'));
+        $this->column->setSize($this->column->getParam('size', '30'));
+        $this->column->setAlign($this->column->getParam('align', 'center'));
     }
 
     public function renderCell($value, $row, $router)
     {
-        return $this->rank++;
+        return $this->column->rank++;
     }
 
     public function getType()

@@ -12,15 +12,25 @@
 
 namespace APY\DataGridBundle\Grid\Column;
 
-class BlankColumn extends Column
+class BlankColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     public function __initialize(array $params)
     {
         $params['filterable'] = false;
         $params['sortable'] = false;
         $params['source'] = false;
 
-        parent::__initialize($params);
+        $this->column->__initialize($params);
     }
 
     public function getType()

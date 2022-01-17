@@ -3,6 +3,7 @@
 namespace APY\DataGridBundle\Grid;
 
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Exception\ColumnAlreadyExistsException;
 use APY\DataGridBundle\Grid\Exception\ColumnNotFoundException;
 use APY\DataGridBundle\Grid\Exception\TypeAlreadyExistsException;
@@ -98,7 +99,7 @@ class GridRegistry implements GridRegistryInterface
      *
      * @return $this
      */
-    public function addColumn(Column $column)
+    public function addColumn(ColumnInterface $column)
     {
         $type = $column->getType();
 

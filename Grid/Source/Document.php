@@ -15,6 +15,7 @@
 namespace APY\DataGridBundle\Grid\Source;
 
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Helper\ColumnsIterator;
 use APY\DataGridBundle\Grid\Row;
 use APY\DataGridBundle\Grid\Rows;
@@ -299,7 +300,7 @@ class Document extends Source
      * @param array $subColumn
      * @param Column \APY\DataGridBundle\Grid\Column\Column
      */
-    protected function addReferencedColumnn(array $subColumn, Column $column)
+    protected function addReferencedColumnn(array $subColumn, ColumnInterface $column)
     {
         $this->referencedColumns[$subColumn[0]][] = $subColumn[1];
 

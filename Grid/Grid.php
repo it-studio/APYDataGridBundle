@@ -40,6 +40,7 @@ class Grid implements GridInterface
     const REQUEST_QUERY_ORDER = '_order';
     const REQUEST_QUERY_TEMPLATE = '_template';
     const REQUEST_QUERY_RESET = '_reset';
+    const REQUEST_QUERY_COLUMNS = '__columns';
 
     const SOURCE_ALREADY_SETTED_EX_MSG = 'The source of the grid is already set.';
     const SOURCE_NOT_SETTED_EX_MSG = 'The source of the grid must be set.';
@@ -121,6 +122,11 @@ class Grid implements GridInterface
      * @var \APY\DataGridBundle\Grid\Source\Source
      */
     protected $source;
+
+    /**
+     *  @var \APY\DataGridBundle\Grid\Column\Column
+     */
+    protected $columnService;
 
     /**
      * @var bool
@@ -344,6 +350,7 @@ class Grid implements GridInterface
         AuthorizationCheckerInterface $authorizationChecker,
         HttpKernelInterface $httpKernel,
         object $twig,
+        object $columnService,
         $id = '',
         GridConfigInterface $config = null)
     {
@@ -356,6 +363,7 @@ class Grid implements GridInterface
         $this->securityContext = $authorizationChecker;
         $this->httpKernel = $httpKernel;
         $this->twig = $twig;
+        $this->columnService = $columnService;
 
         $this->id = $id;
 
@@ -645,6 +653,8 @@ class Grid implements GridInterface
 
         $this->processLimit($this->getFromRequest(self::REQUEST_QUERY_LIMIT));
 
+        $this->processColumns($this->getFromRequest(self::REQUEST_QUERY_COLUMNS));
+
         $this->saveSession();
     }
 
@@ -908,6 +918,11 @@ class Grid implements GridInterface
         }
     }
 
+    protected function processColumns($columns)
+    {
+        $this->set(self::REQUEST_QUERY_COLUMNS, $columns);
+    }
+
     protected function setDefaultSessionData()
     {
         // Default filters
@@ -1036,6 +1051,17 @@ class Grid implements GridInterface
         } else {
             $this->limit = key($this->limits);
         }
+
+        // Columns
+        if (($columns = $this->get(self::REQUEST_QUERY_COLUMNS)) !== null) {
+            foreach ($this->columns as $column) {
+                if (in_array($column->getId(), $columns)) {
+                    $column->setVisible(true);
+                } else {
+                    $column->setVisible(false);
+                }
+            }
+        }
     }
 
     /**
@@ -1074,7 +1100,7 @@ class Grid implements GridInterface
                 if (($actionColumn = $this->columns->hasColumnById($column, true))) {
                     $actionColumn->setRowActions($rowActions);
                 } else {
-                    $actionColumn = new ActionsColumn($column, $this->actionsColumnTitle, $rowActions);
+                    $actionColumn = new ActionsColumn(clone $this->columnService, $column, $this->actionsColumnTitle, $rowActions);
                     if ($this->actionsColumnSize > -1) {
                         $actionColumn->setSize($this->actionsColumnSize);
                     }
@@ -1086,7 +1112,7 @@ class Grid implements GridInterface
 
         //add mass actions column
         if (count($this->massActions) > 0) {
-            $this->columns->addColumn(new MassActionColumn(), 1);
+            $this->columns->addColumn(new MassActionColumn(clone $this->columnService), 1);
         }
 
         $primaryColumnId = $this->columns->getPrimaryColumn()->getId();
@@ -2239,6 +2265,7 @@ class Grid implements GridInterface
                 self::REQUEST_QUERY_ORDER,
                 self::REQUEST_QUERY_TEMPLATE,
                 self::REQUEST_QUERY_RESET,
+                self::REQUEST_QUERY_COLUMNS,
                 MassActionColumn::ID,
             ];
 

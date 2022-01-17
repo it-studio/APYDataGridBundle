@@ -12,23 +12,29 @@
 
 namespace APY\DataGridBundle\Grid\Column;
 
-class ActionsColumn extends Column
+class ActionsColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
     protected $rowActions;
 
      /**
      * ActionsColumn constructor.
      *
-     * @param string $column     Identifier of the column
+     * @param string $columnId   Identifier of the column
      * @param string $title      Title of the column
      * @param array  $rowActions Array of rowAction
      */
-    public function __construct($column, $title, array $rowActions = [])
+    public function __construct(Column $column, $columnId, $title, array $rowActions = [])
     {
+        $this->column = $column;
+
         $this->rowActions = $rowActions;
 
-        parent::__construct([
-            'id'         => $column,
+        $this->__initialize([
+            'id'         => $columnId,
             'title'      => $title,
             'sortable'   => false,
             'source'     => false,
@@ -46,11 +52,11 @@ class ActionsColumn extends Column
             foreach ($actionParameters as $name => $parameter) {
                 if (is_int($name)) {
                     if (($name = $action->getRouteParametersMapping($parameter)) === null) {
-                        $name = $this->getValidRouteParameters($parameter);
+                        $name = $this->column->getValidRouteParameters($parameter);
                     }
                     $routeParameters[$name] = $row->getField($parameter);
                 } else {
-                    $routeParameters[$this->getValidRouteParameters($name)] = $parameter;
+                    $routeParameters[$this->column->getValidRouteParameters($name)] = $parameter;
                 }
             }
 
@@ -88,12 +94,12 @@ class ActionsColumn extends Column
             return false;
         }
 
-        return parent::isVisible();
+        return $this->column->isVisible();
     }
 
     public function getFilterType()
     {
-        return $this->getType();
+        return $this->column->getType();
     }
 
     /**

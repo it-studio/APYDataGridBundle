@@ -12,13 +12,19 @@
 
 namespace APY\DataGridBundle\Grid\Column;
 
-class MassActionColumn extends Column
+class MassActionColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
     const ID = '__action';
 
-    public function __construct()
+    public function __construct(Column $column)
     {
-        parent::__construct([
+        $this->column = $column;
+
+        $this->column->__construct([
             'id'         => self::ID,
             'title'      => '',
             'size'       => 15,
@@ -35,7 +41,7 @@ class MassActionColumn extends Column
             return false;
         }
 
-        return parent::isVisible();
+        return $this->column->isVisible();
     }
 
     public function getFilterType()

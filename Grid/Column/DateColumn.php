@@ -36,21 +36,21 @@ class DateColumn extends DateTimeColumn
                 $dateTo->setTime(23, 59, 59);
 
                 switch ($filter->getOperator()) {
-                    case self::OPERATOR_EQ:
-                        $filters[] = new Filter(self::OPERATOR_GTE, $dateFrom);
-                        $filters[] = new Filter(self::OPERATOR_LTE, $dateTo);
+                    case Column::OPERATOR_EQ:
+                        $filters[] = new Filter(Column::OPERATOR_GTE, $dateFrom);
+                        $filters[] = new Filter(Column::OPERATOR_LTE, $dateTo);
                         break;
-                    case self::OPERATOR_NEQ:
-                        $filters[] = new Filter(self::OPERATOR_LT, $dateFrom);
-                        $filters[] = new Filter(self::OPERATOR_GT, $dateTo);
-                        $this->setDataJunction(self::DATA_DISJUNCTION);
+                    case Column::OPERATOR_NEQ:
+                        $filters[] = new Filter(Column::OPERATOR_LT, $dateFrom);
+                        $filters[] = new Filter(Column::OPERATOR_GT, $dateTo);
+                        $this->setDataJunction(Column::DATA_DISJUNCTION);
                         break;
-                    case self::OPERATOR_LT:
-                    case self::OPERATOR_GTE:
+                    case Column::OPERATOR_LT:
+                    case Column::OPERATOR_GTE:
                         $filters[] = new Filter($filter->getOperator(), $dateFrom);
                         break;
-                    case self::OPERATOR_GT:
-                    case self::OPERATOR_LTE:
+                    case Column::OPERATOR_GT:
+                    case Column::OPERATOR_LTE:
                         $filters[] = new Filter($filter->getOperator(), $dateTo);
                         break;
                     default:

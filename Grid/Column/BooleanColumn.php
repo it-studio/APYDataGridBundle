@@ -12,22 +12,34 @@
 
 namespace APY\DataGridBundle\Grid\Column;
 
-class BooleanColumn extends Column
+class BooleanColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     public function __initialize(array $params)
     {
         $params['filter'] = 'select';
         $params['selectFrom'] = 'values';
-        $params['operators'] = [self::OPERATOR_EQ];
-        $params['defaultOperator'] = self::OPERATOR_EQ;
+        $params['operators'] = [Column::OPERATOR_EQ];
+        $params['defaultOperator'] = Column::OPERATOR_EQ;
         $params['operatorsVisible'] = false;
         $params['selectMulti'] = false;
 
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setAlign($this->getParam('align', 'center'));
-        $this->setSize($this->getParam('size', '30'));
-        $this->setValues($this->getParam('values', [1 => 'true', 0 => 'false']));
+        $this->column->setAlign($this->column->getParam('align', 'center'));
+        $this->column->setSize($this->column->getParam('size', '30'));
+        $this->column->setValues($this->column->getParam('values', [1 => 'true', 0 => 'false']));
+
+        $this->column->setIsQueryValidCallback([$this, "isQueryValid"]);
     }
 
     public function isQueryValid($query)
@@ -42,7 +54,7 @@ class BooleanColumn extends Column
 
     public function renderCell($value, $row, $router)
     {
-        $value = parent::renderCell($value, $row, $router);
+        $value = $this->column->renderCell($value, $row, $router);
 
         return $value ?: 'false';
     }

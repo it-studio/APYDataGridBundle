@@ -14,8 +14,18 @@ namespace APY\DataGridBundle\Grid\Column;
 
 use Symfony\Component\Form\Exception\TransformationFailedException;
 
-class NumberColumn extends Column
+class NumberColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     protected static $styles = [
         'decimal'    => \NumberFormatter::DECIMAL,
         'percent'    => \NumberFormatter::PERCENT,
@@ -46,36 +56,38 @@ class NumberColumn extends Column
 
     public function __initialize(array $params)
     {
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setAlign($this->getParam('align', Column::ALIGN_RIGHT));
-        $this->setStyle($this->getParam('style', 'decimal'));
-        $this->setLocale($this->getParam('locale', \Locale::getDefault()));
-        $this->setPrecision($this->getParam('precision', null));
-        $this->setGrouping($this->getParam('grouping', false));
-        $this->setRoundingMode($this->getParam('roundingMode', \NumberFormatter::ROUND_HALFUP));
-        $this->setRuleSet($this->getParam('ruleSet'));
-        $this->setCurrencyCode($this->getParam('currencyCode'));
-        $this->setFractional($this->getParam('fractional', false));
-        $this->setMaxFractionDigits($this->getParam('maxFractionDigits', null));
+        $this->column->setAlign($this->column->getParam('align', Column::ALIGN_RIGHT));
+        $this->setStyle($this->column->getParam('style', 'decimal'));
+        $this->setLocale($this->column->getParam('locale', \Locale::getDefault()));
+        $this->setPrecision($this->column->getParam('precision', null));
+        $this->setGrouping($this->column->getParam('grouping', false));
+        $this->setRoundingMode($this->column->getParam('roundingMode', \NumberFormatter::ROUND_HALFUP));
+        $this->setRuleSet($this->column->getParam('ruleSet'));
+        $this->setCurrencyCode($this->column->getParam('currencyCode'));
+        $this->setFractional($this->column->getParam('fractional', false));
+        $this->setMaxFractionDigits($this->column->getParam('maxFractionDigits', null));
         if ($this->style === \NumberFormatter::DURATION) {
             $this->setLocale('en');
-            $this->setRuleSet($this->getParam('ruleSet', '%in-numerals')); // or '%with-words'
+            $this->setRuleSet($this->column->getParam('ruleSet', '%in-numerals')); // or '%with-words'
         }
 
-        $this->setOperators($this->getParam('operators', [
-            self::OPERATOR_EQ,
-            self::OPERATOR_NEQ,
-            self::OPERATOR_LT,
-            self::OPERATOR_LTE,
-            self::OPERATOR_GT,
-            self::OPERATOR_GTE,
-            self::OPERATOR_BTW,
-            self::OPERATOR_BTWE,
-            self::OPERATOR_ISNULL,
-            self::OPERATOR_ISNOTNULL,
+        $this->column->setOperators($this->column->getParam('operators', [
+            Column::OPERATOR_EQ,
+            Column::OPERATOR_NEQ,
+            Column::OPERATOR_LT,
+            Column::OPERATOR_LTE,
+            Column::OPERATOR_GT,
+            Column::OPERATOR_GTE,
+            Column::OPERATOR_BTW,
+            Column::OPERATOR_BTWE,
+            Column::OPERATOR_ISNULL,
+            Column::OPERATOR_ISNOTNULL,
         ]));
-        $this->setDefaultOperator($this->getParam('defaultOperator', self::OPERATOR_EQ));
+        $this->column->setDefaultOperator($this->column->getParam('defaultOperator', Column::OPERATOR_EQ));
+
+        $this->column->setIsQueryValidCallback([$this, "isQueryValid"]);
     }
 
     public function isQueryValid($query)
@@ -87,8 +99,8 @@ class NumberColumn extends Column
 
     public function renderCell($value, $row, $router)
     {
-        if (is_callable($this->callback)) {
-            return call_user_func($this->callback, $value, $row, $router);
+        if (is_callable($this->column->callback)) {
+            return call_user_func($this->column->callback, $value, $row, $router);
         }
 
         return $this->getDisplayedValue($value);
@@ -136,8 +148,8 @@ class NumberColumn extends Column
                 throw new TransformationFailedException($formatter->getErrorMessage());
             }
 
-            if (array_key_exists((string) $value, $this->values)) {
-                $value = $this->values[$value];
+            if (array_key_exists((string) $value, $this->column->values)) {
+                $value = $this->column->values[$value];
             }
 
             return $value;
@@ -148,7 +160,7 @@ class NumberColumn extends Column
 
     public function getFilters($source)
     {
-        $parentFilters = parent::getFilters($source);
+        $parentFilters = $this->column->getFilters($source);
 
         $filters = [];
         foreach ($parentFilters as $filter) {

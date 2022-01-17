@@ -14,48 +14,58 @@ namespace APY\DataGridBundle\Grid\Column;
 
 use APY\DataGridBundle\Grid\Filter;
 
-class SimpleArrayColumn extends Column
+class SimpleArrayColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     public function __initialize(array $params)
     {
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setOperators($this->getParam('operators', [
-            self::OPERATOR_LIKE,
-            self::OPERATOR_NLIKE,
-            self::OPERATOR_EQ,
-            self::OPERATOR_NEQ,
-            self::OPERATOR_ISNULL,
-            self::OPERATOR_ISNOTNULL,
+        $this->column->setOperators($this->column->getParam('operators', [
+            Column::OPERATOR_LIKE,
+            Column::OPERATOR_NLIKE,
+            Column::OPERATOR_EQ,
+            Column::OPERATOR_NEQ,
+            Column::OPERATOR_ISNULL,
+            Column::OPERATOR_ISNOTNULL,
         ]));
-        $this->setDefaultOperator($this->getParam('defaultOperator', self::OPERATOR_LIKE));
+        $this->column->setDefaultOperator($this->column->getParam('defaultOperator', Column::OPERATOR_LIKE));
     }
 
     public function getFilters($source)
     {
-        $parentFilters = parent::getFilters($source);
+        $parentFilters = $this->column->getFilters($source);
 
         $filters = [];
         foreach ($parentFilters as $filter) {
             switch ($filter->getOperator()) {
-                case self::OPERATOR_EQ:
-                case self::OPERATOR_NEQ:
+                case Column::OPERATOR_EQ:
+                case Column::OPERATOR_NEQ:
                     $value = $filter->getValue();
                     $filters[] = new Filter($filter->getOperator(), $value);
                     break;
-                case self::OPERATOR_LIKE:
-                case self::OPERATOR_NLIKE:
+                case Column::OPERATOR_LIKE:
+                case Column::OPERATOR_NLIKE:
                     $value = $filter->getValue();
                     $filters[] = new Filter($filter->getOperator(), $value);
                     break;
-                case self::OPERATOR_ISNULL:
-                    $filters[] = new Filter(self::OPERATOR_ISNULL);
-                    $filters[] = new Filter(self::OPERATOR_EQ, '');
-                    $this->setDataJunction(self::DATA_DISJUNCTION);
+                case Column::OPERATOR_ISNULL:
+                    $filters[] = new Filter(Column::OPERATOR_ISNULL);
+                    $filters[] = new Filter(Column::OPERATOR_EQ, '');
+                    $this->setDataJunction(Column::DATA_DISJUNCTION);
                     break;
-                case self::OPERATOR_ISNOTNULL:
-                    $filters[] = new Filter(self::OPERATOR_ISNOTNULL);
-                    $filters[] = new Filter(self::OPERATOR_NEQ, '');
+                case Column::OPERATOR_ISNOTNULL:
+                    $filters[] = new Filter(Column::OPERATOR_ISNOTNULL);
+                    $filters[] = new Filter(Column::OPERATOR_NEQ, '');
                     break;
                 default:
                     $filters[] = $filter;
@@ -67,16 +77,16 @@ class SimpleArrayColumn extends Column
 
     public function renderCell($values, $row, $router)
     {
-        if (is_callable($this->callback)) {
-            return call_user_func($this->callback, $values, $row, $router);
+        if (is_callable($this->column->callback)) {
+            return call_user_func($this->column->callback, $values, $row, $router);
         }
 
         // @todo: when it has an array as value?
         $return = [];
         if (is_array($values) || $values instanceof \Traversable) {
             foreach ($values as $key => $value) {
-                if (!is_array($value) && isset($this->values[(string) $value])) {
-                    $value = $this->values[$value];
+                if (!is_array($value) && isset($this->column->values[(string) $value])) {
+                    $value = $this->column->values[$value];
                 }
 
                 $return[$key] = $value;

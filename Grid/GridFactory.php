@@ -3,6 +3,7 @@
 namespace APY\DataGridBundle\Grid;
 
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Exception\UnexpectedTypeException;
 use APY\DataGridBundle\Grid\Source\Source;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -27,6 +28,7 @@ class GridFactory implements GridFactoryInterface
     protected $authorizationChecker;
     protected $httpKernel;
     protected $twig;
+    protected $columnService;
 
     /**
      * Constructor.
@@ -40,6 +42,7 @@ class GridFactory implements GridFactoryInterface
         AuthorizationCheckerInterface $authorizationChecker,
         HttpKernelInterface $httpKernel,
         object $twig,
+        object $columnService,
     )
     {
         $this->registry = $registry;
@@ -48,6 +51,7 @@ class GridFactory implements GridFactoryInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->httpKernel = $httpKernel;
         $this->twig = $twig;
+        $this->columnService = $columnService;
     }
 
     /**
@@ -73,6 +77,7 @@ class GridFactory implements GridFactoryInterface
             $this->authorizationChecker,
             $this->httpKernel,
             $this->twig,
+            $this->columnService,
             $type->getName(),
             $options
         );
@@ -88,7 +93,7 @@ class GridFactory implements GridFactoryInterface
      */
     public function createColumn($name, $type, array $options = [])
     {
-        if (!$type instanceof Column) {
+        if (!$type instanceof ColumnInterface) {
             if (!is_string($type)) {
                 throw new UnexpectedTypeException($type, 'string, APY\DataGridBundle\Grid\Column\Column');
             }

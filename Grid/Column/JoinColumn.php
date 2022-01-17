@@ -14,19 +14,29 @@ namespace APY\DataGridBundle\Grid\Column;
 
 class JoinColumn extends TextColumn
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     protected $joinColumns = [];
 
-    protected $dataJunction = self::DATA_DISJUNCTION;
+    protected $dataJunction = Column::DATA_DISJUNCTION;
 
     public function __initialize(array $params)
     {
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setJoinColumns($this->getParam('columns', []));
-        $this->setSeparator($this->getParam('separator', '&nbsp;'));
+        $this->setJoinColumns($this->column->getParam('columns', []));
+        $this->column->setSeparator($this->column->getParam('separator', '&nbsp;'));
 
-        $this->setVisibleForSource(true);
-        $this->setIsManualField(true);
+        $this->column->setVisibleForSource(true);
+        $this->column->setIsManualField(true);
     }
 
     public function setJoinColumns(array $columns)
@@ -45,7 +55,7 @@ class JoinColumn extends TextColumn
 
         // Apply same filters on each column
         foreach ($this->joinColumns as $columnName) {
-            $tempFilters = parent::getFilters($source);
+            $tempFilters = $this->column->getFilters($source);
 
             foreach ($tempFilters as $filter) {
                 $filter->setColumnName($columnName);

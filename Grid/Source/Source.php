@@ -13,6 +13,7 @@
 namespace APY\DataGridBundle\Grid\Source;
 
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Exception\PropertyAccessDeniedException;
 use APY\DataGridBundle\Grid\Helper\ColumnsIterator;
 use APY\DataGridBundle\Grid\Mapping\Driver\DriverInterface;
@@ -572,7 +573,7 @@ abstract class Source implements DriverInterface
      */
     protected function prepareStringForLikeCompare($input, $type = null)
     {
-        if ($type === 'array') {
+        if (in_array($type, ["array", "simple_array"])) {
             $outputString = str_replace(':{i:0;', ':{', serialize($input));
         } else {
             $outputString = $this->removeAccents($input);
@@ -589,7 +590,7 @@ abstract class Source implements DriverInterface
         return preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $noaccentStr);
     }
 
-    protected function prepareColumnValues(Column $column, $values)
+    protected function prepareColumnValues(ColumnInterface $column, $values)
     {
         $existingValues = $column->getValues();
         if (!empty($existingValues)) {

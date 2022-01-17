@@ -14,6 +14,7 @@ namespace APY\DataGridBundle\Grid;
 
 use APY\DataGridBundle\Grid\Column\ActionsColumn;
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Helper\ColumnsIterator;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -55,7 +56,7 @@ class Columns implements \IteratorAggregate, \Countable
      *
      * @return Columns
      */
-    public function addColumn(Column $column, $position = 0)
+    public function addColumn(ColumnInterface $column, $position = 0)
     {
         $column->setAuthorizationChecker($this->authorizationChecker);
 

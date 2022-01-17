@@ -4,6 +4,7 @@
 {% if grid.totalCount > 0 or grid.isFiltered or grid.noDataMessage is same as (false) %}
     <form id="{{ grid.hash }}" action="{{ grid.routeUrl }}" method="post">
         <div class="grid_header">
+        {{ grid_columns(grid) }}
         {% if grid.massActions|length > 0 %}
             {{ grid_actions(grid) }}
         {% endif %}
@@ -347,10 +348,6 @@
 {% set isNullOperator = constant('APY\\DataGridBundle\\Grid\\Column\\Column::OPERATOR_ISNULL') %}
 {% set isNotNullOperator = constant('APY\\DataGridBundle\\Grid\\Column\\Column::OPERATOR_ISNOTNULL') %}
 {% if column %}
-  {% set op = column.defaultOperator %}
-  {% set from = null %}
-  {% set to = null %}
-{% else %}
   {% set op = column.data.operator is defined ? column.data.operator : column.defaultOperator %}
   {% set from = column.data.from is defined ? column.data.from : null %}
   {% set to = column.data.to is defined ? column.data.to : null %}
@@ -398,8 +395,23 @@
 {% block grid_column_filter_type_actions %}
     <a class="grid-reset" href="{{ grid_url('reset', grid) }}">{{ 'Reset'|trans }}</a>
 {% endblock grid_column_filter_type_actions %}
-
-
+{# --------------------------------------------------- grid_columns ------------------------------------------------- #}
+{% block grid_columns %}
+    <div class="columns">
+        {% spaceless %}
+            <div class="grid_columns">
+                <select multiple name="{{ grid.hash }}[{{ constant('APY\\DataGridBundle\\Grid\\Grid::REQUEST_QUERY_COLUMNS') }}][]">
+                    {% for column in grid.columns %}
+                        {% if column.visibleForSource %}
+                            <option value="{{ column.id }}"{% if column.visible %} selected="selected"{% endif %}>{{ column.title|trans }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <input type="submit"  value="{{ 'Submit Action'|trans }}"/>
+            </div>
+        {% endspaceless %}
+    </div>
+{% endblock grid_columns %}
 
 {# --------------------------------------------------- grid_scripts -------------------------------------------------- #}
 {% block grid_scripts %}

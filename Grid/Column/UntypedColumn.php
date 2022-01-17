@@ -12,8 +12,18 @@
 
 namespace APY\DataGridBundle\Grid\Column;
 
-class UntypedColumn extends Column
+class UntypedColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     protected $type = null;
 
     public function getParams()
