@@ -173,6 +173,17 @@ services:
         tags:
             - { name: apy_grid.export, alias: excel }
 
+    apy_grid.export.excel_mpdf:
+        public: true
+        class: APY\DataGridBundle\Grid\Export\ExcelMPdfExport
+        arguments:
+            - '@twig'
+            - '@router'
+            - '@translator'
+            - '%kernel.charset%'
+        tags:
+            - { name: apy_grid.export, alias: pdf }
+
     apy_grid.export.html:
         public: true
         class: APY\DataGridBundle\Grid\Export\HTMLExport

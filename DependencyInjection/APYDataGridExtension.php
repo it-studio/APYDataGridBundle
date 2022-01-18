@@ -12,6 +12,9 @@
 
 namespace APY\DataGridBundle\DependencyInjection;
 
+use Mpdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Writer;
+
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -40,5 +43,20 @@ class APYDataGridExtension extends Extension
         $container->setParameter('apy_data_grid.actions_columns_size', $config['actions_columns_size']);
         $container->setParameter('apy_data_grid.actions_columns_title', $config['actions_columns_title']);
         $container->setParameter('apy_data_grid.pagerfanta', $config['pagerfanta']);
+
+        $this->checkDependencies($container);
+    }
+
+    protected function checkDependencies(ContainerBuilder $container) {
+        if (!class_exists(Writer\Xlsx::class)) {
+            $container->removeDefinition('apy_grid.export.excel');
+        }
+        if (!class_exists(Writer\Html::class)) {
+            $container->removeDefinition('apy_grid.export.html');
+        }
+        if (!class_exists(Writer\Pdf\Mpdf::class) && !class_exists(Mpdf::class))
+        {
+            $container->removeDefinition('apy_grid.export.excel_mpdf');
+        }
     }
 }
