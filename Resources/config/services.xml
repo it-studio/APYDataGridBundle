@@ -62,7 +62,7 @@
         </service>
 
         <service id="grid.mapping.manager" class="%grid.mapping.manager.class%" shared="false" public="true">
-            <argument type="service" id="form.factory"/>
+            <argument type="service" id="cache.app"/>
             <call method="addDriver">
                 <argument type="service" id="grid.metadata.driver.annotation" />
                 <argument>1</argument>

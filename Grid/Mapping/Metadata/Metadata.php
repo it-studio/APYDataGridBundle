@@ -12,7 +12,7 @@
 
 namespace APY\DataGridBundle\Grid\Mapping\Metadata;
 
-class Metadata
+class Metadata implements \Serializable
 {
     protected $name;
     protected $fields;
@@ -103,5 +103,27 @@ class Metadata
         }
 
         return $columns;
+    }
+
+    public function serialize(): string
+    {
+        $data = [
+            "name" => $this->getName(),
+            "fields" => $this->fields,
+            "fieldsMappings" => $this->fieldsMappings,
+            "groupBy" => $this->groupBy,
+        ];
+
+        return serialize($data);
+    }
+
+    public function unserialize(string $string)
+    {
+        $data = unserialize($string);
+
+        $this->name = $data["name"];
+        $this->fields = $data["fields"];
+        $this->fieldsMappings = $data["fieldsMappings"];
+        $this->groupBy = $data["groupBy"];
     }
 }

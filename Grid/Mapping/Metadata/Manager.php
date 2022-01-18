@@ -14,6 +14,9 @@
 
 namespace APY\DataGridBundle\Grid\Mapping\Metadata;
 
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+
 class Manager
 {
     /**
@@ -21,8 +24,11 @@ class Manager
      */
     protected $drivers;
 
-    public function __construct()
+    protected $cache;
+
+    public function __construct(CacheInterface $cache)
     {
+        $this->cache = $cache;
         $this->drivers = new DriverHeap();
     }
 
@@ -45,35 +51,55 @@ class Manager
     {
         $metadata = new Metadata();
 
-        $columns = $fieldsMetadata = $groupBy = [];
+        $self = $this;
 
-        foreach ($this->getDrivers() as $driver) {
-            $columns = array_merge($columns, $driver->getClassColumns($className, $group));
-            $fieldsMetadata[] = $driver->getFieldsMetadata($className, $group);
-            $groupBy = array_merge($groupBy, $driver->getGroupBy($className, $group));
-        }
+        $key = $this->getCacheKey($className, $group);
+        $data = $this->cache->get($key, function (ItemInterface $item) use ($self, $metadata, $className, $group) {
+            $columns = $fieldsMetadata = $groupBy = [];
 
-        $mappings = $cols = [];
+            foreach ($self->getDrivers() as $driver) {
+                $columns = array_merge($columns, $driver->getClassColumns($className, $group));
+                $fieldsMetadata[] = $driver->getFieldsMetadata($className, $group);
+                $groupBy = array_merge($groupBy, $driver->getGroupBy($className, $group));
+            }
 
-        foreach ($columns as $fieldName) {
-            $map = [];
+            $mappings = $cols = [];
 
-            foreach ($fieldsMetadata as $field) {
-                if (isset($field[$fieldName]) && (!isset($field[$fieldName]['groups']) || in_array($group, (array) $field[$fieldName]['groups']))) {
-                    $map = array_merge($map, $field[$fieldName]);
+            foreach ($columns as $fieldName) {
+                $map = [];
+
+                foreach ($fieldsMetadata as $field) {
+                    if (isset($field[$fieldName]) && (!isset($field[$fieldName]['groups']) || in_array($group, (array) $field[$fieldName]['groups']))) {
+                        $map = array_merge($map, $field[$fieldName]);
+                    }
+                }
+
+                if (!empty($map)) {
+                    $mappings[$fieldName] = $map;
+                    $cols[] = $fieldName;
                 }
             }
 
-            if (!empty($map)) {
-                $mappings[$fieldName] = $map;
-                $cols[] = $fieldName;
-            }
-        }
+            $metadata->setFields($cols);
+            $metadata->setFieldsMappings($mappings);
+            $metadata->setGroupBy($groupBy);
 
-        $metadata->setFields($cols);
-        $metadata->setFieldsMappings($mappings);
-        $metadata->setGroupBy($groupBy);
+            return $metadata->serialize();
+        });
+
+        $metadata->unserialize($data);
 
         return $metadata;
+    }
+
+    protected function getCacheKey($className, $group)
+    {
+        $key = $className;
+
+        if (!empty($group)) {
+            $key .= "_" . $group;
+        }
+
+        return md5($key);
     }
 }
