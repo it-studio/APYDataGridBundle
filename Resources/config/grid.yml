@@ -2,6 +2,7 @@ parameters:
     apy_grid.factory.class: APY\DataGridBundle\Grid\GridFactory
     apy_grid.registry.class: APY\DataGridBundle\Grid\GridRegistry
     apy_grid.type.grid.class: APY\DataGridBundle\Grid\Type\GridType
+    apy_grid.type.cached_grid.class: APY\DataGridBundle\Grid\Type\CachedGridType
     apy_grid.column.class: APY\DataGridBundle\Grid\Column\Column
     apy_grid.column.text.class: APY\DataGridBundle\Grid\Column\TextColumn
     apy_grid.column.number.class: APY\DataGridBundle\Grid\Column\NumberColumn
@@ -27,6 +28,7 @@ parameters:
     apy_grid.export.scsv.class: APY\DataGridBundle\Grid\Export\SCSVExport
     apy_grid.export.excel.class: APY\DataGridBundle\Grid\Export\ExcelExport
     apy_grid.export.html.class: APY\DataGridBundle\Grid\Export\HTMLExport
+    apy_grid.cached_grid_builder: APY\DataGridBundle\Grid\CachedGridBuilder
 
 services:
     # Core
@@ -48,6 +50,14 @@ services:
     # Types
     apy_grid.type.grid:
         class: '%apy_grid.type.grid.class%'
+        tags:
+            - { name: apy_grid.type }
+
+    apy_grid.type.cached_grid:
+        class: '%apy_grid.type.cached_grid.class%'
+        arguments:
+            - '@cache.app'
+            - '%apy_grid.cached_grid_builder%'
         tags:
             - { name: apy_grid.type }
 
