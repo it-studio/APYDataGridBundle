@@ -54,7 +54,7 @@ class APYDataGridExtension extends Extension
         if (!class_exists(Writer\Html::class)) {
             $container->removeDefinition('apy_grid.export.html');
         }
-        if (!class_exists(Writer\Pdf\Mpdf::class) && !class_exists(Mpdf::class))
+        if (!class_exists(Writer\Pdf\Mpdf::class) || !class_exists(Mpdf::class))
         {
             $container->removeDefinition('apy_grid.export.excel_mpdf');
         }
