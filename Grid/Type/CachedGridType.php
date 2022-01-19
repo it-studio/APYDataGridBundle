@@ -78,4 +78,18 @@ class CachedGridType extends GridType
             $builder->add($columnData["name"], $columnData["type"], $columnData["options"]);
         }
     }
+
+    /**
+     * this can be called to explicitly invalidate columns cache
+     *
+     * @param string $gridIdentifier
+     */
+    public function invalidateColumnsCache(string $gridIdentifier)
+    {
+        $key = $this->getColumnsCacheKey($gridIdentifier);
+
+        $this->cache->delete($key);
+
+        return $this;
+    }
 }

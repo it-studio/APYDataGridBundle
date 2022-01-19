@@ -152,3 +152,54 @@ class ProductController extends Controller
     }
 }
 ```
+
+Creating a grid from a type with cached columns declaration
+-----------------------------------------------------------
+
+Grid type can extend ``CachedGridType`` and then it can use cached columns definition (which
+alone can take much time and resources in some cases).
+
+```php
+class ProductListType extends CachedGridType
+{
+    public function buildGrid(GridBuilder $builder, array $options = [])
+    {
+        parent::buildGrid($builder, $options);
+        
+        $this->addCachedColumns(function(CachedGridBuilderInterface $builder) use ($options) {
+            $builder
+                ->add('id', 'number', [
+                    'title'   => '#',
+                    'primary' => 'true',
+                ])
+                ->add('name', 'text')
+                ->add('created_at', 'datetime', [
+                    'field' => 'createdAt',
+                ])
+                ->add('status', 'text');
+                ;
+        }, $builder);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'source'       => new Entity('MyProjectBundle:Product'),
+            'persistence'  => true,
+            'route'        => 'product_list',
+            'filterable'   => false,
+            'sortable'     => false,
+            'max_per_page' => 20,
+        ]);
+    }
+
+    public function getName()
+    {
+        return 'product_list';
+    }
+}
+```
+
+Grid type of this class can be forced to invalidate its columns cache by calling ``invalidateColumnsCache()`` method.
