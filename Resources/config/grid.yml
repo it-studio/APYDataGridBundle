@@ -28,7 +28,8 @@ parameters:
     apy_grid.export.scsv.class: APY\DataGridBundle\Grid\Export\SCSVExport
     apy_grid.export.excel.class: APY\DataGridBundle\Grid\Export\ExcelExport
     apy_grid.export.html.class: APY\DataGridBundle\Grid\Export\HTMLExport
-    apy_grid.cached_grid_builder: APY\DataGridBundle\Grid\CachedGridBuilder
+    apy_grid.cached_grid_builder.class: APY\DataGridBundle\Grid\CachedGridBuilder
+    apy.grid.cached_grid_builder.cache_expiration: 3600
 
 services:
     # Core
@@ -57,7 +58,8 @@ services:
         class: '%apy_grid.type.cached_grid.class%'
         arguments:
             - '@cache.app'
-            - '%apy_grid.cached_grid_builder%'
+            - '%apy_grid.cached_grid_builder.class%'
+            - '%apy.grid.cached_grid_builder.cache_expiration%'
         tags:
             - { name: apy_grid.type }
 

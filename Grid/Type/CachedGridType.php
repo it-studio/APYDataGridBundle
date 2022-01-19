@@ -18,11 +18,13 @@ class CachedGridType extends GridType
 {
     protected $cache;
     protected $cacheGridBuilderClass;
+    protected $cacheExpiration;
 
-    public function __construct(CacheInterface $cache, string $cacheGridBuilderClass)
+    public function __construct(CacheInterface $cache, string $cacheGridBuilderClass, int $cacheExpiration = null)
     {
         $this->cache = $cache;
         $this->cacheGridBuilderClass = $cacheGridBuilderClass;
+        $this->cacheExpiration = $cacheExpiration;
     }
 
     /**
@@ -65,7 +67,12 @@ class CachedGridType extends GridType
         $key = $this->getColumnsCacheKey($gridIdentifier);
 
         $cachedGridBuilder = new $this->cacheGridBuilderClass;
-        $serializedCachedGridBuilder = $this->cache->get($key, function (ItemInterface $item) use ($cachedGridBuilder, $callback) {
+        $cacheExpiration = $this->cacheExpiration;
+        $serializedCachedGridBuilder = $this->cache->get($key, function (ItemInterface $item) use ($cachedGridBuilder, $callback, $cacheExpiration) {
+            if (!empty($cacheExpiration)) {
+                $item->expiresAfter($cacheExpiration);
+            }
+
             call_user_func($callback, $cachedGridBuilder);
 
             return $cachedGridBuilder->serialize();

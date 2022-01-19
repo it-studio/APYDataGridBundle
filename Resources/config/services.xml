@@ -10,6 +10,7 @@
         <parameter key="grid.manager.class">APY\DataGridBundle\Grid\GridManager</parameter>
         <parameter key="grid.metadata.driver.annotation.class">APY\DataGridBundle\Grid\Mapping\Driver\Annotation</parameter>
         <parameter key="grid.mapping.manager.class">APY\DataGridBundle\Grid\Mapping\Metadata\Manager</parameter>
+        <parameter key="grid.mapping.manager.cache_expiration">3600</parameter>
     </parameters>
 
     <services>
@@ -62,7 +63,8 @@
         </service>
 
         <service id="grid.mapping.manager" class="%grid.mapping.manager.class%" shared="false" public="true">
-            <argument type="service" id="cache.app"/>
+            <argument type="service" id="cache.app" />
+            <argument>%grid.mapping.manager.cache_expiration%</argument>
             <call method="addDriver">
                 <argument type="service" id="grid.metadata.driver.annotation" />
                 <argument>1</argument>

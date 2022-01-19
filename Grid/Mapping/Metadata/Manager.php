@@ -25,10 +25,13 @@ class Manager
     protected $drivers;
 
     protected $cache;
+    protected $cacheExpiration;
 
-    public function __construct(CacheInterface $cache)
+    public function __construct(CacheInterface $cache, int $cacheExpiration = null)
     {
         $this->cache = $cache;
+        $this->cacheExpiration = $cacheExpiration;
+
         $this->drivers = new DriverHeap();
     }
 
@@ -54,7 +57,12 @@ class Manager
         $self = $this;
 
         $key = $this->getCacheKey($className, $group);
-        $data = $this->cache->get($key, function (ItemInterface $item) use ($self, $metadata, $className, $group) {
+        $cacheExpiration = $this->cacheExpiration;
+        $data = $this->cache->get($key, function (ItemInterface $item) use ($self, $metadata, $className, $group, $cacheExpiration) {
+            if (!empty($cacheExpiration)) {
+                $item->expiresAfter($cacheExpiration);
+            }
+
             $columns = $fieldsMetadata = $groupBy = [];
 
             foreach ($self->getDrivers() as $driver) {
