@@ -911,6 +911,18 @@ class Grid implements GridInterface
         }
     }
 
+    public function getOrder()
+    {
+        return $this->get(self::REQUEST_QUERY_ORDER);
+    }
+
+    public function setOrder($order)
+    {
+        $this->set(self::REQUEST_QUERY_ORDER, $order);
+
+        return $this;
+    }
+
     protected function processLimit($limit)
     {
         if (isset($this->limits[$limit])) {
@@ -2273,23 +2285,65 @@ class Grid implements GridInterface
                 unset($session[$request_query]);
             }
 
-            foreach ($session as $columnId => $sessionFilter) {
-                if (isset($sessionFilter['operator'])) {
-                    $operator = $sessionFilter['operator'];
-                    unset($sessionFilter['operator']);
-                } else {
-                    $operator = $this->getColumn($columnId)->getDefaultOperator();
-                }
-
-                if (!isset($sessionFilter['to']) && isset($sessionFilter['from'])) {
-                    $sessionFilter = $sessionFilter['from'];
-                }
-
-                $this->sessionFilters[$columnId] = new Filter($operator, $sessionFilter);
-            }
+            $this->sessionFilters = $this->getFiltersFromSessionData($session);
         }
 
         return $this->sessionFilters;
+    }
+
+    /**
+     * transforms session data to array of filters
+     *
+     * @param array $data
+     * @return array
+     */
+    public function getFiltersFromSessionData(array $data)
+    {
+        $res = [];
+
+        foreach ($data as $columnId => $filter) {
+            if (isset($filter['operator'])) {
+                $operator = $filter['operator'];
+                unset($filter["operator"]);
+            } else {
+                $operator = $this->getColumn($columnId)->getDefaultOperator();
+            }
+
+            if (!isset($filter['to']) && isset($filter['from'])) {
+                $filter = $filter['from'];
+            }
+
+            $res[$columnId] = new Filter($operator, $filter);
+        }
+
+        return $res;
+    }
+
+    /**
+     * transforms array of filters to session data
+     *
+     * @param array $data
+     * @return array
+     */
+    public function getSessionDataFromFilters(array $data)
+    {
+        $res = [];
+
+        foreach ($data as $columnId => $filter) {
+            $res[$columnId] = [
+                "operator" => $filter->getOperator(),
+            ];
+            $value = $filter->getValue();
+            if (is_array($value)) {
+                foreach ($value as $key => $val) {
+                    $res[$columnId][$key] = $val;
+                }
+            } else {
+                $res[$columnId]["from"] = $value;
+            }
+        }
+
+        return $res;
     }
 
     /**

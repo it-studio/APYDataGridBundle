@@ -30,6 +30,12 @@ parameters:
     apy_grid.export.html.class: APY\DataGridBundle\Grid\Export\HTMLExport
     apy_grid.cached_grid_builder.class: APY\DataGridBundle\Grid\CachedGridBuilder
     apy.grid.cached_grid_builder.cache_expiration: 3600
+    apy.grid.url_filter_serializer.class: APY\DataGridBundle\Grid\UrlFilterSerializer
+    apy.grid.url_filter_serializer.filter_separator: "/"
+    apy.grid.url_filter_serializer.operator_separator: "|"
+    apy.grid.url_filter_serializer.value_separator: ","
+    apy.grid.url_filter_serializer.order_identifier: "order"
+    apy.grid.url_filter_serializer.page_identifier: "page"
 
 services:
     # Core
@@ -258,3 +264,14 @@ services:
             - '%kernel.charset%'
         tags:
             - { name: apy_grid.export, alias: html }
+
+    #misc
+    apy.grid.url_filter_serializer:
+        public: true
+        class: '%apy.grid.url_filter_serializer.class%'
+        arguments:
+            - '%apy.grid.url_filter_serializer.filter_separator%'
+            - '%apy.grid.url_filter_serializer.operator_separator%'
+            - '%apy.grid.url_filter_serializer.value_separator%'
+            - '%apy.grid.url_filter_serializer.order_identifier%'
+            - '%apy.grid.url_filter_serializer.page_identifier%'
