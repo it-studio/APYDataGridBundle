@@ -487,8 +487,6 @@ class Document extends Source
                 $result = $query->select($column->getField())
                     ->distinct($column->getField())
                     ->sort($column->getField(), 'asc')
-                    ->skip(null)
-                    ->limit(null)
                     ->getQuery()
                     ->execute();
 

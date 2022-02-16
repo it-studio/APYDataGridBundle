@@ -19,6 +19,7 @@ parameters:
     apy_grid.source.vector.class: APY\DataGridBundle\Grid\Source\Vector
     apy_grid.source.entity.class: APY\DataGridBundle\Grid\Source\Entity
     apy_grid.source.document.class: APY\DataGridBundle\Grid\Source\Document
+    apy_grid.source.mongo.class: APY\DataGridBundle\Grid\Source\Mongo
     apy_grid.export_factory.class: APY\DataGridBundle\Grid\ExportFactory
     apy_grid.export.csv.class: APY\DataGridBundle\Grid\Export\CSVExport
     apy_grid.export.xml.class: APY\DataGridBundle\Grid\Export\XMLExport
@@ -33,6 +34,7 @@ parameters:
     apy.grid.url_filter_serializer.class: APY\DataGridBundle\Grid\UrlFilterSerializer
     apy.grid.url_filter_serializer.filter_separator: "/"
     apy.grid.url_filter_serializer.operator_separator: "|"
+    apy.grid.url_filter_serializer.range_separator: "-"
     apy.grid.url_filter_serializer.value_separator: ","
     apy.grid.url_filter_serializer.order_identifier: "order"
     apy.grid.url_filter_serializer.page_identifier: "page"
@@ -170,6 +172,14 @@ services:
         tags:
             - { name: apy_grid.source, alias: document }
 
+    apy_grid.mongo.document:
+        class: '%apy_grid.source.mongo.class%'
+        arguments:
+            - '@apy_grid.column'
+            - '@doctrine_mongodb.odm.document_manager'
+        tags:
+            - { name: apy_grid.source, alias: mongo }
+
     # exports
     apy_grid.export_factory:
         public: true
@@ -272,6 +282,7 @@ services:
         arguments:
             - '%apy.grid.url_filter_serializer.filter_separator%'
             - '%apy.grid.url_filter_serializer.operator_separator%'
+            - '%apy.grid.url_filter_serializer.range_separator%'
             - '%apy.grid.url_filter_serializer.value_separator%'
             - '%apy.grid.url_filter_serializer.order_identifier%'
             - '%apy.grid.url_filter_serializer.page_identifier%'

@@ -165,7 +165,11 @@ class NumberColumn implements ColumnInterface
         $filters = [];
         foreach ($parentFilters as $filter) {
             // Transforme in number for ODM
-            $filters[] = ($filter->getValue() === null) ? $filter : $filter->setValue($filter->getValue() + 0);
+            $val = $filter->getValue();
+            if (is_array($val)) {
+                $val = reset($val);
+            }
+            $filters[] = ($filter->getValue() === null) ? $filter : $filter->setValue((int) $val);
         }
 
         return $filters;

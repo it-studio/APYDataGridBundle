@@ -29,13 +29,17 @@ abstract class Source implements DriverInterface
     protected $count;
 
     /**
-     * @param \Doctrine\ODM\MongoDB\Query\Builder $queryBuilder
+     * @param $queryBuilder querybuilder or any other structure
+     *
+     * @return mixed
      */
     public function prepareQuery($queryBuilder)
     {
         if (is_callable($this->prepareQueryCallback)) {
-            call_user_func($this->prepareQueryCallback, $queryBuilder);
+            return call_user_func($this->prepareQueryCallback, $queryBuilder);
         }
+
+        return $queryBuilder;
     }
 
     /**
