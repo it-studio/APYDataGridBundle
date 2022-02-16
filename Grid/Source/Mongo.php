@@ -129,8 +129,6 @@ class Mongo extends Source
 
         $this->currentSearch = $search;
 
-        dump($search);
-
         $this->count = $this->mongoCollection->count($search, $searchParams);
 
         if ($page > 0) {
