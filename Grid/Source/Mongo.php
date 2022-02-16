@@ -266,11 +266,16 @@ class Mongo extends Source
 
     public function populateSelectFilters($columns, $loop = false)
     {
+        // optimalization - getting all values at once
+        $cols = [
+            "source" => [], // get all distinct values from a whole source
+            "query" => [], // get distinct values from query
+        ];
+
         foreach ($columns as $column) {
             $selectFrom = $column->getSelectFrom();
 
             if ($column->getFilterType() === 'select' && ($selectFrom === 'source' || $selectFrom === 'query')) {
-
                 // For negative operators, show all values
                 if ($selectFrom === 'query') {
                     foreach ($column->getFilters('mongo') as $filter) {
@@ -281,19 +286,62 @@ class Mongo extends Source
                     }
                 }
 
-                // Dynamic from query or not ?
-                $search = ($selectFrom === 'source') ? [] : $this->currentSearch;
-
-                $field = $column->getField();
-                $results = $this->mongoCollection->distinct($field, $search);
-
-                $values = [];
-                foreach ($results as $value) {
-                    $values[] = $this->untransformRecordValue($value);
+                if (in_array($selectFrom, ["source", "query"])) {
+                    $cols[$selectFrom][] = $column;
                 }
+            }
+        }
 
-                sort($values);
-                $column->setValues($values);
+        $values = [];
+
+        // from source
+        if (!empty($cols["source"])) {
+            $projection = [];
+            if (!empty($cols["source"])) {
+                foreach ($cols["source"] as $col) {
+                    if ($col->getField()) {
+                        $projection[$col->getField()] = true;
+                        $values[$col->getField()] = [];
+                    }
+                }
+            }
+            $results = $this->mongoCollection->find([], ["projection" => $projection]);
+            foreach ($results as $result) {
+                foreach ($result as $field => $value) {
+                    if (isset($projection[$field])) {
+                        $values[$field][$value] = $value;
+                    }
+                }
+            }
+        }
+
+        // from query
+        if (!empty($cols["query"])) {
+            $projection = [];
+            if (!empty($cols["query"])) {
+                foreach ($cols["query"] as $col) {
+                    if ($col->getField()) {
+                        $projection[$col->getField()] = true;
+                        $values[$col->getField()] = [];
+                    }
+                }
+            }
+            $results = $this->mongoCollection->find($this->currentSearch, ["projection" => $projection]);
+            foreach ($results as $result) {
+                foreach ($result as $field => $value) {
+                    if (isset($projection[$field])) {
+                        $values[$field][$value] = $value;
+                    }
+                }
+            }
+        }
+
+        // zpracovani hodnot a promitnuti do sloupcu
+        foreach ($columns as $column) {
+            $field = $column->getField();
+            if (isset($values[$field])) {
+                asort($values[$field]);
+                $column->setValues($values[$field]);
             }
         }
     }
