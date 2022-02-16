@@ -1,7 +1,9 @@
 <?php
 namespace APY\DataGridBundle\Grid\Source;
 
+use APY\DataGridBundle\Grid\Column\BooleanColumn;
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Row;
 use APY\DataGridBundle\Grid\Rows;
 use Doctrine\Persistence\ObjectManager;
@@ -83,7 +85,7 @@ class Mongo extends Source
                 foreach ($filters as $filter) {
                     //normalize values
                     $operator = $this->normalizeOperator($filter->getOperator());
-                    $value = $this->normalizeValue($filter->getOperator(), $filter->getValue());
+                    $value = $this->normalizeValue($filter->getOperator(), $filter->getValue(), $column);
                     $columnFilters[] = [$operator => $value];
                 }
 
@@ -229,8 +231,13 @@ class Mongo extends Source
         }
     }
 
-    protected function normalizeValue($operator, $value)
+    protected function normalizeValue($operator, $value, ColumnInterface $column = null)
     {
+        if ($column && $column instanceof BooleanColumn) {
+            $value = (boolean) $value;
+            return $value;
+        }
+
         switch ($operator) {
             case Column::OPERATOR_LIKE:
                 return new Regex($value, 'i');
