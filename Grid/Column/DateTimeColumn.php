@@ -14,8 +14,12 @@ namespace APY\DataGridBundle\Grid\Column;
 
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToLocalizedStringTransformer;
 
-class DateTimeColumn extends Column
+class DateTimeColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
     protected $dateFormat = \IntlDateFormatter::MEDIUM;
 
     protected $timeFormat = \IntlDateFormatter::MEDIUM;
@@ -30,26 +34,34 @@ class DateTimeColumn extends Column
 
     protected $timezone;
 
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     public function __initialize(array $params)
     {
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setFormat($this->getParam('format'));
-        $this->setInputFormat($this->getParam('inputFormat', $this->fallbackInputFormat));
-        $this->setOperators($this->getParam('operators', [
-            self::OPERATOR_EQ,
-            self::OPERATOR_NEQ,
-            self::OPERATOR_LT,
-            self::OPERATOR_LTE,
-            self::OPERATOR_GT,
-            self::OPERATOR_GTE,
-            self::OPERATOR_BTW,
-            self::OPERATOR_BTWE,
-            self::OPERATOR_ISNULL,
-            self::OPERATOR_ISNOTNULL,
+        $this->setFormat($this->column->getParam('format'));
+        $this->setInputFormat($this->column->getParam('inputFormat', $this->fallbackInputFormat));
+        $this->column->setOperators($this->column->getParam('operators', [
+            Column::OPERATOR_EQ,
+            Column::OPERATOR_NEQ,
+            Column::OPERATOR_LT,
+            Column::OPERATOR_LTE,
+            Column::OPERATOR_GT,
+            Column::OPERATOR_GTE,
+            Column::OPERATOR_BTW,
+            Column::OPERATOR_BTWE,
+            Column::OPERATOR_ISNULL,
+            Column::OPERATOR_ISNOTNULL,
         ]));
-        $this->setDefaultOperator($this->getParam('defaultOperator', self::OPERATOR_EQ));
-        $this->setTimezone($this->getParam('timezone', date_default_timezone_get()));
+        $this->column->setDefaultOperator($this->column->getParam('defaultOperator', Column::OPERATOR_EQ));
+        $this->setTimezone($this->column->getParam('timezone', date_default_timezone_get()));
+
+        $this->column->setIsQueryValidCallback([$this, "isQueryValid"]);
     }
 
     public function isQueryValid($query)
@@ -66,7 +78,7 @@ class DateTimeColumn extends Column
 
     public function getFilters($source)
     {
-        $parentFilters = parent::getFilters($source);
+        $parentFilters = $this->column->getFilters($source);
 
         $filters = [];
         foreach ($parentFilters as $filter) {
@@ -80,8 +92,8 @@ class DateTimeColumn extends Column
     {
         $value = $this->getDisplayedValue($value);
 
-        if (is_callable($this->callback)) {
-            $value = call_user_func($this->callback, $value, $row, $router);
+        if (is_callable($this->column->callback)) {
+            $value = call_user_func($this->column->callback, $value, $row, $router);
         }
 
         return $value;
@@ -103,8 +115,8 @@ class DateTimeColumn extends Column
                 }
             }
 
-            if (array_key_exists((string) $value, $this->values)) {
-                $value = $this->values[$value];
+            if (array_key_exists((string) $value, $this->column->values)) {
+                $value = $this->column->values[$value];
             }
 
             return $value;

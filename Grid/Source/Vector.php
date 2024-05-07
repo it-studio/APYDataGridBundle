@@ -49,6 +49,13 @@ class Vector extends Source
      */
     protected $columns;
 
+    protected $columnService;
+
+    public function __construct(Column $columnService)
+    {
+        $this->columnService = $columnService;
+    }
+
     public function setup(array $parameters)
     {
         $defaults = [
@@ -89,7 +96,7 @@ class Vector extends Source
                     'visible'    => true,
                     'field'      => $id,
                 ];
-                $guessedColumns[] = new UntypedColumn($params);
+                $guessedColumns[] = new UntypedColumn($this->columnService, $params);
             }
         }
 
@@ -166,23 +173,23 @@ class Vector extends Source
             if ($c instanceof UntypedColumn) {
                 switch ($c->getType()) {
                     case 'date':
-                        $column = new DateColumn($c->getParams());
+                        $column = new DateColumn($this->columnService, $c->getParams());
                         break;
                     case 'datetime':
-                        $column = new DateTimeColumn($c->getParams());
+                        $column = new DateTimeColumn($this->columnService, $c->getParams());
                         break;
                     case 'boolean':
-                        $column = new BooleanColumn($c->getParams());
+                        $column = new BooleanColumn($this->columnService, $c->getParams());
                         break;
                     case 'number':
-                        $column = new NumberColumn($c->getParams());
+                        $column = new NumberColumn($this->columnService, $c->getParams());
                         break;
                     case 'array':
-                        $column = new ArrayColumn($c->getParams());
+                        $column = new ArrayColumn($this->columnService, $c->getParams());
                         break;
                     case 'text':
                     default:
-                        $column = new TextColumn($c->getParams());
+                        $column = new TextColumn($this->columnService, $c->getParams());
                         break;
                 }
             } else {

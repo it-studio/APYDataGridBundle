@@ -14,25 +14,35 @@ namespace APY\DataGridBundle\Grid\Column;
 
 use APY\DataGridBundle\Grid\Filter;
 
-class ArrayColumn extends Column
+class ArrayColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+    }
+
     public function __initialize(array $params)
     {
-        parent::__initialize($params);
+        $this->column->__initialize($params);
 
-        $this->setOperators($this->getParam('operators', [
-            self::OPERATOR_LIKE,
-            self::OPERATOR_NLIKE,
-            self::OPERATOR_EQ,
-            self::OPERATOR_NEQ,
-            self::OPERATOR_ISNULL,
-            self::OPERATOR_ISNOTNULL,
+        $this->column->setOperators($this->column->getParam('operators', [
+            Column::OPERATOR_LIKE,
+            Column::OPERATOR_NLIKE,
+            Column::OPERATOR_EQ,
+            Column::OPERATOR_NEQ,
+            Column::OPERATOR_ISNULL,
+            Column::OPERATOR_ISNOTNULL,
         ]));
     }
 
     public function getFilters($source)
     {
-        $parentFilters = parent::getFilters($source);
+        $parentFilters = $this->column->getFilters($source);
 
         $filters = [];
         foreach ($parentFilters as $filter) {
@@ -40,8 +50,8 @@ class ArrayColumn extends Column
                 $filters[] = $filter;
             } else {
                 switch ($filter->getOperator()) {
-                    case self::OPERATOR_EQ:
-                    case self::OPERATOR_NEQ:
+                    case Column::OPERATOR_EQ:
+                    case Column::OPERATOR_NEQ:
                         $filterValues = (array) $filter->getValue();
                         $value = '';
                         $counter = 1;
@@ -52,20 +62,20 @@ class ArrayColumn extends Column
 
                         $filters[] = new Filter($filter->getOperator(), 'a:' . count($filterValues) . ':{' . $value . '}');
                         break;
-                    case self::OPERATOR_LIKE:
-                    case self::OPERATOR_NLIKE:
+                    case Column::OPERATOR_LIKE:
+                    case Column::OPERATOR_NLIKE:
                         $len = strlen($filter->getValue());
                         $value = 's:' . $len . ':"' . $filter->getValue() . '";';
                         $filters[] = new Filter($filter->getOperator(), $value);
                         break;
-                    case self::OPERATOR_ISNULL:
-                        $filters[] = new Filter(self::OPERATOR_ISNULL);
-                        $filters[] = new Filter(self::OPERATOR_EQ, 'a:0:{}');
-                        $this->setDataJunction(self::DATA_DISJUNCTION);
+                    case Column::OPERATOR_ISNULL:
+                        $filters[] = new Filter(Column::OPERATOR_ISNULL);
+                        $filters[] = new Filter(Column::OPERATOR_EQ, 'a:0:{}');
+                        $this->column->setDataJunction(Column::DATA_DISJUNCTION);
                         break;
-                    case self::OPERATOR_ISNOTNULL:
-                        $filters[] = new Filter(self::OPERATOR_ISNOTNULL);
-                        $filters[] = new Filter(self::OPERATOR_NEQ, 'a:0:{}');
+                    case Column::OPERATOR_ISNOTNULL:
+                        $filters[] = new Filter(Column::OPERATOR_ISNOTNULL);
+                        $filters[] = new Filter(Column::OPERATOR_NEQ, 'a:0:{}');
                         break;
                     default:
                         $filters[] = $filter;
@@ -78,16 +88,16 @@ class ArrayColumn extends Column
 
     public function renderCell($values, $row, $router)
     {
-        if (is_callable($this->callback)) {
-            return call_user_func($this->callback, $values, $row, $router);
+        if (is_callable($this->column->callback)) {
+            return call_user_func($this->column->callback, $values, $row, $router);
         }
 
         $return = [];
         if (is_array($values) || $values instanceof \Traversable) {
             foreach ($values as $key => $value) {
                 // @todo: this seems like dead code
-                if (!is_array($value) && isset($this->values[(string) $value])) {
-                    $value = $this->values[$value];
+                if (!is_array($value) && isset($this->column->values[(string) $value])) {
+                    $value = $this->column->values[$value];
                 }
 
                 $return[$key] = $value;

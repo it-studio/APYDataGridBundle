@@ -1,8 +1,49 @@
+parameters:
+    apy_grid.factory.class: APY\DataGridBundle\Grid\GridFactory
+    apy_grid.registry.class: APY\DataGridBundle\Grid\GridRegistry
+    apy_grid.type.grid.class: APY\DataGridBundle\Grid\Type\GridType
+    apy_grid.type.cached_grid.class: APY\DataGridBundle\Grid\Type\CachedGridType
+    apy_grid.column.class: APY\DataGridBundle\Grid\Column\Column
+    apy_grid.column.text.class: APY\DataGridBundle\Grid\Column\TextColumn
+    apy_grid.column.number.class: APY\DataGridBundle\Grid\Column\NumberColumn
+    apy_grid.column.boolean.class: APY\DataGridBundle\Grid\Column\BooleanColumn
+    apy_grid.column.date_time.class: APY\DataGridBundle\Grid\Column\DateTimeColumn
+    apy_grid.column.date.class: APY\DataGridBundle\Grid\Column\DateColumn
+    apy_grid.column.time.class: APY\DataGridBundle\Grid\Column\TimeColumn
+    apy_grid.column.array.class: APY\DataGridBundle\Grid\Column\ArrayColumn
+    apy_grid.column.simple_array.class: APY\DataGridBundle\Grid\Column\SimpleArrayColumn
+    apy_grid.column.blank.class: APY\DataGridBundle\Grid\Column\BlankColumn
+    apy_grid.column.rank.class: APY\DataGridBundle\Grid\Column\RankColumn
+    apy_grid.column.join.class: APY\DataGridBundle\Grid\Column\JoinColumn
+    apy_grid.source_factory.class: APY\DataGridBundle\Grid\SourceFactory
+    apy_grid.source.vector.class: APY\DataGridBundle\Grid\Source\Vector
+    apy_grid.source.entity.class: APY\DataGridBundle\Grid\Source\Entity
+    apy_grid.source.document.class: APY\DataGridBundle\Grid\Source\Document
+    apy_grid.source.mongo.class: APY\DataGridBundle\Grid\Source\Mongo
+    apy_grid.export_factory.class: APY\DataGridBundle\Grid\ExportFactory
+    apy_grid.export.csv.class: APY\DataGridBundle\Grid\Export\CSVExport
+    apy_grid.export.xml.class: APY\DataGridBundle\Grid\Export\XMLExport
+    apy_grid.export.json.class: APY\DataGridBundle\Grid\Export\JSONExport
+    apy_grid.export.dsv.class: APY\DataGridBundle\Grid\Export\DSVExport
+    apy_grid.export.tsv.class: APY\DataGridBundle\Grid\Export\TSVExport
+    apy_grid.export.scsv.class: APY\DataGridBundle\Grid\Export\SCSVExport
+    apy_grid.export.excel.class: APY\DataGridBundle\Grid\Export\ExcelExport
+    apy_grid.export.html.class: APY\DataGridBundle\Grid\Export\HTMLExport
+    apy_grid.cached_grid_builder.class: APY\DataGridBundle\Grid\CachedGridBuilder
+    apy.grid.cached_grid_builder.cache_expiration: 3600
+    apy.grid.url_filter_serializer.class: APY\DataGridBundle\Grid\UrlFilterSerializer
+    apy.grid.url_filter_serializer.filter_separator: "/"
+    apy.grid.url_filter_serializer.operator_separator: "|"
+    apy.grid.url_filter_serializer.range_separator: "-"
+    apy.grid.url_filter_serializer.value_separator: ","
+    apy.grid.url_filter_serializer.order_identifier: "order"
+    apy.grid.url_filter_serializer.page_identifier: "page"
+
 services:
     # Core
     apy_grid.factory:
         public: true
-        class: APY\DataGridBundle\Grid\GridFactory
+        class: '%apy_grid.factory.class%'
         arguments:
             - '@apy_grid.registry'
             - '@request_stack'
@@ -10,71 +51,113 @@ services:
             - '@security.authorization_checker'
             - '@http_kernel'
             - '@twig'
+            - '@apy_grid.column'
     apy_grid.registry:
         public: true
-        class: APY\DataGridBundle\Grid\GridRegistry
+        class: '%apy_grid.registry.class%'
 
     # Types
     apy_grid.type.grid:
-        class: APY\DataGridBundle\Grid\Type\GridType
+        class: '%apy_grid.type.grid.class%'
+        tags:
+            - { name: apy_grid.type }
+
+    apy_grid.type.cached_grid:
+        class: '%apy_grid.type.cached_grid.class%'
+        arguments:
+            - '@cache.app'
+            - '%apy_grid.cached_grid_builder.class%'
+            - '%apy.grid.cached_grid_builder.cache_expiration%'
         tags:
             - { name: apy_grid.type }
 
     # Columns
+    apy_grid.column:
+        public: true
+        class: '%apy_grid.column.class%'
     apy_grid.column.text:
-        class: APY\DataGridBundle\Grid\Column\TextColumn
+        class: '%apy_grid.column.text.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.array:
-        class: APY\DataGridBundle\Grid\Column\ArrayColumn
+        class: '%apy_grid.column.array.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.blank:
-        class: APY\DataGridBundle\Grid\Column\BlankColumn
+        class: '%apy_grid.column.blank.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.boolean:
-        class: APY\DataGridBundle\Grid\Column\BooleanColumn
+        class: '%apy_grid.column.boolean.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.date:
-        class: APY\DataGridBundle\Grid\Column\DateColumn
+        class: '%apy_grid.column.date.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.date_time:
-        class: APY\DataGridBundle\Grid\Column\DateTimeColumn
+        class: '%apy_grid.column.date_time.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.join:
-        class: APY\DataGridBundle\Grid\Column\JoinColumn
+        class: '%apy_grid.column.join.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.number:
-        class: APY\DataGridBundle\Grid\Column\NumberColumn
+        class: '%apy_grid.column.number.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.rank:
-        class: APY\DataGridBundle\Grid\Column\RankColumn
+        class: '%apy_grid.column.rank.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
     apy_grid.column.time:
-        class: APY\DataGridBundle\Grid\Column\TimeColumn
+        class: '%apy_grid.column.time.class%'
+        arguments:
+            - '@apy_grid.column'
+        tags:
+            - { name: apy_grid.column }
+    apy_grid.column.simple_array:
+        class: '%apy_grid.column.simple_array.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.column }
 
+    # sources
     apy_grid.source_factory:
         public: true
-        class: APY\DataGridBundle\Grid\SourceFactory
+        class: '%apy_grid.source_factory.class%'
         arguments:
             - '@apy_grid.registry'
 
     apy_grid.source.vector:
-        class: APY\DataGridBundle\Grid\Source\Vector
+        class: '%apy_grid.source.vector.class%'
+        arguments:
+            - '@apy_grid.column'
         tags:
             - { name: apy_grid.source, alias: vector }
 
     apy_grid.source.entity:
-        class: APY\DataGridBundle\Grid\Source\Entity
+        class: '%apy_grid.source.entity.class%'
         arguments:
             - '@doctrine'
             - '@grid.mapping.manager'
@@ -82,23 +165,31 @@ services:
             - { name: apy_grid.source, alias: entity }
 
     apy_grid.source.document:
-        class: APY\DataGridBundle\Grid\Source\Document
+        class: '%apy_grid.source.document.class%'
         arguments:
             - '@doctrine_mongodb.odm.document_manager'
             - '@grid.mapping.manager'
         tags:
             - { name: apy_grid.source, alias: document }
 
+    apy_grid.mongo.document:
+        class: '%apy_grid.source.mongo.class%'
+        arguments:
+            - '@apy_grid.column'
+            - '@doctrine_mongodb.odm.document_manager'
+        tags:
+            - { name: apy_grid.source, alias: mongo }
+
     # exports
     apy_grid.export_factory:
         public: true
-        class: APY\DataGridBundle\Grid\ExportFactory
+        class: '%apy_grid.export_factory.class%'
         arguments:
             - '@apy_grid.registry'
 
     apy_grid.export.csv:
         public: true
-        class: APY\DataGridBundle\Grid\Export\CSVExport
+        class: '%apy_grid.export.csv.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -109,7 +200,7 @@ services:
 
     apy_grid.export.xml:
         public: true
-        class: APY\DataGridBundle\Grid\Export\XMLExport
+        class: '%apy_grid.export.xml.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -120,7 +211,7 @@ services:
 
     apy_grid.export.json:
         public: true
-        class: APY\DataGridBundle\Grid\Export\JSONExport
+        class: '%apy_grid.export.json.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -131,7 +222,7 @@ services:
 
     apy_grid.export.dsv:
         public: true
-        class: APY\DataGridBundle\Grid\Export\DSVExport
+        class: '%apy_grid.export.dsv.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -142,7 +233,7 @@ services:
 
     apy_grid.export.tsv:
         public: true
-        class: APY\DataGridBundle\Grid\Export\TSVExport
+        class: '%apy_grid.export.tsv.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -153,7 +244,7 @@ services:
 
     apy_grid.export.scsv:
         public: true
-        class: APY\DataGridBundle\Grid\Export\SCSVExport
+        class: '%apy_grid.export.scsv.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -164,7 +255,7 @@ services:
 
     apy_grid.export.excel:
         public: true
-        class: APY\DataGridBundle\Grid\Export\ExcelExport
+        class: '%apy_grid.export.excel.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -186,7 +277,7 @@ services:
 
     apy_grid.export.html:
         public: true
-        class: APY\DataGridBundle\Grid\Export\HTMLExport
+        class: '%apy_grid.export.html.class%'
         arguments:
             - '@twig'
             - '@router'
@@ -194,3 +285,15 @@ services:
             - '%kernel.charset%'
         tags:
             - { name: apy_grid.export, alias: html }
+
+    #misc
+    apy.grid.url_filter_serializer:
+        public: true
+        class: '%apy.grid.url_filter_serializer.class%'
+        arguments:
+            - '%apy.grid.url_filter_serializer.filter_separator%'
+            - '%apy.grid.url_filter_serializer.operator_separator%'
+            - '%apy.grid.url_filter_serializer.range_separator%'
+            - '%apy.grid.url_filter_serializer.value_separator%'
+            - '%apy.grid.url_filter_serializer.order_identifier%'
+            - '%apy.grid.url_filter_serializer.page_identifier%'

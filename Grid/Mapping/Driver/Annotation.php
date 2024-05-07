@@ -12,6 +12,7 @@
 
 namespace APY\DataGridBundle\Grid\Mapping\Driver;
 
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Mapping\Column as Column;
 use APY\DataGridBundle\Grid\Mapping\Source as Source;
 
@@ -101,7 +102,7 @@ class Annotation implements DriverInterface
 
     protected function getMetadataFromClassProperty($className, $class, $name = null, $group = 'default')
     {
-        if ($class instanceof Column) {
+        if ($class instanceof ColumnInterface) {
             $metadata = $class->getMetadata();
 
             if (isset($metadata['id']) && $name !== null) {
@@ -164,7 +165,7 @@ class Annotation implements DriverInterface
                 $this->sortable[$className][$sourceGroup] = $class->isSortable();
                 $this->groupBy[$className][$sourceGroup] = $class->getGroupBy();
             }
-        } elseif ($class instanceof Column) {
+        } elseif ($class instanceof ColumnInterface) {
             $this->getMetadataFromClassProperty($className, $class, null, $group);
         }
     }

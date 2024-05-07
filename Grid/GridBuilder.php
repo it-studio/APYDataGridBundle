@@ -3,6 +3,7 @@
 namespace APY\DataGridBundle\Grid;
 
 use APY\DataGridBundle\Grid\Column\Column;
+use APY\DataGridBundle\Grid\Column\ColumnInterface;
 use APY\DataGridBundle\Grid\Exception\InvalidArgumentException;
 use APY\DataGridBundle\Grid\Exception\UnexpectedTypeException;
 use Symfony\Component\Routing\RouterInterface;
@@ -35,6 +36,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
     protected $authorizationChecker;
     protected $httpKernel;
     protected $twig;
+    protected $columnService;
 
     /**
      * GridBuilder constructor.
@@ -45,6 +47,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @param HttpKernelInterface $httpKernel
      * @param object $twig
+     * @param object $columnService
      * @param string $name The name of the grid
      * @param array $options The options of the grid
      */
@@ -55,6 +58,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
         AuthorizationCheckerInterface $authorizationChecker,
         HttpKernelInterface $httpKernel,
         object $twig,
+        object $columnService,
         $name,
         array $options = []
     )
@@ -67,6 +71,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->httpKernel = $httpKernel;
         $this->twig = $twig;
+        $this->columnService = $columnService;
     }
 
     /**
@@ -74,7 +79,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
      */
     public function add($name, $type, array $options = [])
     {
-        if (!$type instanceof Column) {
+        if (!$type instanceof ColumnInterface) {
             if (!is_string($type)) {
                 throw new UnexpectedTypeException($type, 'string, APY\DataGridBundle\Grid\Column\Column');
             }
@@ -132,6 +137,7 @@ class GridBuilder extends GridConfigBuilder implements GridBuilderInterface
             $this->authorizationChecker,
             $this->httpKernel,
             $this->twig,
+            $this->columnService,
             $config->getName(),
             $config,
         );

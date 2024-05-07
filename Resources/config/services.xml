@@ -8,6 +8,9 @@
         <parameter key="grid.twig_extension.class">APY\DataGridBundle\Twig\DataGridExtension</parameter>
         <parameter key="grid.class">APY\DataGridBundle\Grid\Grid</parameter>
         <parameter key="grid.manager.class">APY\DataGridBundle\Grid\GridManager</parameter>
+        <parameter key="grid.metadata.driver.annotation.class">APY\DataGridBundle\Grid\Mapping\Driver\Annotation</parameter>
+        <parameter key="grid.mapping.manager.class">APY\DataGridBundle\Grid\Mapping\Metadata\Manager</parameter>
+        <parameter key="grid.mapping.manager.cache_expiration">3600</parameter>
     </parameters>
 
     <services>
@@ -26,6 +29,7 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="http_kernel" />
             <argument type="service" id="twig" />
+            <argument type="service" id="apy_grid.column" />
             <call method="setLimits">
                 <argument>%apy_data_grid.limits%</argument>
             </call>
@@ -54,12 +58,13 @@
             <argument type="service" id="twig" />
         </service>
 
-        <service id="grid.metadata.driver.annotation" class="APY\DataGridBundle\Grid\Mapping\Driver\Annotation">
+        <service id="grid.metadata.driver.annotation" class="%grid.metadata.driver.annotation.class%">
             <argument type="service" id="annotation_reader" />
         </service>
 
-        <service id="grid.mapping.manager" class="APY\DataGridBundle\Grid\Mapping\Metadata\Manager" shared="false" public="true">
-            <argument type="service" id="form.factory"/>
+        <service id="grid.mapping.manager" class="%grid.mapping.manager.class%" shared="false" public="true">
+            <argument type="service" id="cache.app" />
+            <argument>%grid.mapping.manager.cache_expiration%</argument>
             <call method="addDriver">
                 <argument type="service" id="grid.metadata.driver.annotation" />
                 <argument>1</argument>

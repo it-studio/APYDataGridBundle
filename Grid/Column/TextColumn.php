@@ -14,8 +14,22 @@ namespace APY\DataGridBundle\Grid\Column;
 
 use APY\DataGridBundle\Grid\Filter;
 
-class TextColumn extends Column
+class TextColumn implements ColumnInterface
 {
+    use ColumnAccessTrait;
+
+    protected $column;
+
+    public function __construct(Column $column, $params = null)
+    {
+        $this->column = $column;
+        $this->__initialize((array) $params);
+
+        $this->column->setIsQueryValidCallback([$this, "isQueryValid"]);
+    }
+
+    // changes
+
     public function isQueryValid($query)
     {
         $result = array_filter((array) $query, 'is_string');
@@ -25,19 +39,19 @@ class TextColumn extends Column
 
     public function getFilters($source)
     {
-        $parentFilters = parent::getFilters($source);
+        $parentFilters = $this->column->getFilters($source);
 
         $filters = [];
         foreach ($parentFilters as $filter) {
             switch ($filter->getOperator()) {
-                case self::OPERATOR_ISNULL:
-                    $filters[] = new Filter(self::OPERATOR_ISNULL);
-                    $filters[] = new Filter(self::OPERATOR_EQ, '');
-                    $this->setDataJunction(self::DATA_DISJUNCTION);
+                case Column::OPERATOR_ISNULL:
+                    $filters[] = new Filter(Column::OPERATOR_ISNULL);
+                    $filters[] = new Filter(Column::OPERATOR_EQ, '');
+                    $this->column->setDataJunction(Column::DATA_DISJUNCTION);
                     break;
-                case self::OPERATOR_ISNOTNULL:
-                    $filters[] = new Filter(self::OPERATOR_ISNOTNULL);
-                    $filters[] = new Filter(self::OPERATOR_NEQ, '');
+                case Column::OPERATOR_ISNOTNULL:
+                    $filters[] = new Filter(Column::OPERATOR_ISNOTNULL);
+                    $filters[] = new Filter(Column::OPERATOR_NEQ, '');
                     break;
                 default:
                     $filters[] = $filter;
